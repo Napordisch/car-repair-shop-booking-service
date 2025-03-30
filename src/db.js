@@ -87,10 +87,10 @@ sequelize.sync()
 
 async function registerCustomer(phoneNumber, firstName, lastName, email) {
     if (phoneNumber === undefined) {
-        throw new Error("no phone number")
+        throw new Error("no-phone-number")
     }
     if (firstName === undefined) {
-        throw new Error("no first name")
+        throw new Error("no-first-name")
     }
     let newCustomer = Customer.build({
         phoneNumber: phoneNumber,

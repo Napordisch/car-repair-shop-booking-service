@@ -22,3 +22,21 @@ app.post('/login', async (req, res) => {
     }
     res.send()
 })
+
+app.post('/register', async (req, res) => {
+    let message = "";
+    try {
+        await db.registerCustomer(req.body.phoneNumber, req.body.firstName);
+        res.status(201);
+    } catch (error) {
+        res.status(401);
+
+        if(error.message === 'no-first-name') {
+            message = "no-first-name";
+        }
+        else if(error.message === 'no-phone-number') {
+            message = "no-phone-number";
+        }
+    }
+    res.send(message);
+})
