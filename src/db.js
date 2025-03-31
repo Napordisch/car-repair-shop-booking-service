@@ -7,75 +7,48 @@ const sequelize = new Sequelize({
 });
 
 const item = {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: uuidv4,
-        allowNull: false,
-        primaryKey: true,
-    }
+    id: {type: DataTypes.UUID, defaultValue: uuidv4, allowNull: false, primaryKey: true,}
 }
 
 const Person = {
     ...item,
-    firstName: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    lastName: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    phoneNumber: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        unique: true
-    },
-    email: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    }
+    firstName: {type: DataTypes.TEXT, allowNull: false,},
+    lastName: {type: DataTypes.TEXT, allowNull: true,},
+    phoneNumber: {type: DataTypes.TEXT, allowNull: false, unique: true},
+    email: {type: DataTypes.TEXT, allowNull: true,}
 }
 
 const Customer = sequelize.define('Customer', {
     ...Person,
-    phoneNumber: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        unique: true
-    }
-});
-
-const Order = sequelize.define('Order', {
-    ...item,
-});
- const Employee = sequelize.define('Employee', {
-    ...Person
+    phoneNumber: {type: DataTypes.TEXT, allowNull: false, unique: true}
 });
 
 const Service = sequelize.define('Service', {
     ...item,
-    // price in the smallest currency unit: copecks, cents...
-    price: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    name: {
-        allowNull: false,
-        type: DataTypes.TEXT,
-    },
-    description: {
-        allowNull: true,
-        type: DataTypes.TEXT,
-    }
+
+
+    price: {type: DataTypes.INTEGER, allowNull: false,}, // price in the smallest currency unit: copecks, cents...
+    name: {allowNull: false, type: DataTypes.TEXT, unique: true},
+    description: {allowNull: true, type: DataTypes.TEXT,}
 });
 
-const Job = sequelize.define('Job', {
+
+const Order = sequelize.define('Order', {
     ...item,
-    serviceID: {
-        allowNull: false,
-        type: DataTypes.TEXT,
-    }
-});
+    deadline: {allowNull: false, type: DataTypes.DATE,
+    },
+
+    initialVisit: {allowNull: false, type: DataTypes.DATE,},
+})
+
+const ParkingSpace = sequelize.define('ParkingSpace', {
+    number: {type: DataTypes.INTEGER, allowNull: false, primaryKey: true,
+    },
+    registrationNumber: {type: DataTypes.TEXT, allowNull: false,},
+    occupied: {allowNull: false, type: DataTypes.BOOLEAN, defaultValue: false,},
+
+    orderID: {type: DataTypes.UUID, allowNull: false,}
+})
 
 sequelize.sync()
   .then(() => {
@@ -115,8 +88,19 @@ async function getCustomerId(phoneNumber) {
     if (foundCustomer === null) {
         return null;
     }
-
     return foundCustomer.id;
 }
 
-export {item, sequelize, Customer, registerCustomer, getCustomerId};
+async function addService(price, name, description) {
+    await Service.create({
+        price: price,
+        name: name,
+        description: description
+    })
+}
+
+async function allServices(){
+    return await Service.findAll();
+}
+
+export {registerCustomer, getCustomerId, addService, allServices};
