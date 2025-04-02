@@ -1,9 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
-import {Sequelize, DataTypes, Error} from 'sequelize';
+import {v4 as uuidv4} from 'uuid';
+import {DataTypes, Error, Sequelize} from 'sequelize';
 
 const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: 'data/db.sqlite',
+    dialect: 'sqlite',
+    storage: 'data/db.sqlite',
 });
 
 const item = {
@@ -33,14 +33,16 @@ const Service = sequelize.define('Service', {
 
 const Order = sequelize.define('Order', {
     ...item,
-    deadline: {allowNull: false, type: DataTypes.DATE,
+    deadline: {
+        allowNull: false, type: DataTypes.DATE,
     },
 
     initialVisit: {allowNull: false, type: DataTypes.DATE,},
 })
 
 const ParkingSpace = sequelize.define('ParkingSpace', {
-    number: {type: DataTypes.INTEGER, allowNull: false, primaryKey: true,
+    number: {
+        type: DataTypes.INTEGER, allowNull: false, primaryKey: true,
     },
     registrationNumber: {type: DataTypes.TEXT, allowNull: false,},
     occupied: {allowNull: false, type: DataTypes.BOOLEAN, defaultValue: false,},
@@ -49,12 +51,12 @@ const ParkingSpace = sequelize.define('ParkingSpace', {
 })
 
 sequelize.sync()
-  .then(() => {
-    console.log('Database & tables created!');
-})
-  .catch((err) => {
-    console.error('Error creating database tables:', err);
-});
+    .then(() => {
+        console.log('Database & tables created!');
+    })
+    .catch((err) => {
+        console.error('Error creating database tables:', err);
+    });
 
 async function registerCustomer(phoneNumber, firstName, lastName, email) {
     if (phoneNumber === undefined) {
@@ -65,7 +67,7 @@ async function registerCustomer(phoneNumber, firstName, lastName, email) {
     }
     let newCustomer = Customer.build({
         phoneNumber: phoneNumber,
-        firstName:firstName
+        firstName: firstName
     });
 
     if (!lastName === undefined) {
@@ -103,7 +105,7 @@ async function removeService(id) {
     })
 }
 
-async function allServices(){
+async function allServices() {
     return await Service.findAll();
 }
 

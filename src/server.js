@@ -31,10 +31,9 @@ app.post('/register', async (req, res) => {
     } catch (error) {
         res.status(401);
 
-        if(error.message === 'no-first-name') {
+        if (error.message === 'no-first-name') {
             message = "no-first-name";
-        }
-        else if(error.message === 'no-phone-number') {
+        } else if (error.message === 'no-phone-number') {
             message = "no-phone-number";
         }
     }
@@ -74,7 +73,7 @@ app.post('/admin/remove-service', async (req, res) => {
         console.log('trying');
         await db.removeService(req.body.id);
         res.status(200);
-   } catch (error) {
+    } catch (error) {
         console.error(error);
         message = error.name;
         res.status(500);
