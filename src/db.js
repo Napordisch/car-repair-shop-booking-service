@@ -25,8 +25,6 @@ const Customer = sequelize.define('Customer', {
 
 const Service = sequelize.define('Service', {
     ...item,
-
-
     price: {type: DataTypes.INTEGER, allowNull: false,}, // price in the smallest currency unit: copecks, cents...
     name: {allowNull: false, type: DataTypes.TEXT, unique: true},
     description: {allowNull: true, type: DataTypes.TEXT,}
@@ -99,8 +97,14 @@ async function addService(price, name, description) {
     })
 }
 
+async function removeService(id) {
+    await Service.destroy({
+        where: {id: id}
+    })
+}
+
 async function allServices(){
     return await Service.findAll();
 }
 
-export {registerCustomer, getCustomerId, addService, allServices};
+export {registerCustomer, getCustomerId, addService, allServices, removeService};

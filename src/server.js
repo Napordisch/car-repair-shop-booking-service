@@ -51,18 +51,33 @@ app.get('/services', async (req, res) => {
     res.send();
 })
 
+// TODO: authentication
 app.post('/admin/add-service', async (req, res) => {
     let message;
     let newService = req.body;
     try {
-        console.log("trying");
         await db.addService(newService.price, newService.name, newService.description);
         res.status(201);
     } catch (error) {
+        console.error(error);
         if (error.name === "SequelizeUniqueConstraintError") {
             message = "service already exists" + " (" + error.name + ")";
             res.status(409);
         }
+    }
+    res.send(message);
+})
+
+app.post('/admin/remove-service', async (req, res) => {
+    let message;
+    try {
+        console.log('trying');
+        await db.removeService(req.body.id);
+        res.status(200);
+   } catch (error) {
+        console.error(error);
+        message = error.name;
+        res.status(500);
     }
     res.send(message);
 })
