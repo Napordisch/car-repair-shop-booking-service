@@ -1,13 +1,17 @@
 body {
     font-family: Inter, Arial, sans-serif;
-    margin-left: 3em;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+
+    align-items: center;
 }
 
-.services {
+.services,
+.buy-button-with-price {
     max-width: 700px;
+    margin-right: 1em;
+    margin-left: 3em;
+
 }
 
 input[type="checkbox"] {
@@ -68,4 +72,53 @@ h3 {
     position: absolute;
     left: -2em;
 
+}
+
+button {
+    font-size: 1em;
+    border-style: none;
+    border-radius: 0.5em;
+    height: 2em;
+    padding: 0em 0.5em;
+    background-color: black;
+    color: white;
+}
+
+@media (pointer:coarse) {
+    button {
+        height: 3em;
+        padding: 0em 1em;
+    }
+
+    button:active {
+        background-color: rgb(71, 71, 71);
+    }
+
+}
+
+
+button:active {
+    background-color: rgb(71, 71, 71);
+}
+
+
+
+.buy-button-with-price {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+    width: 100%;
+    gap: 1em;
+}
+
+.button-with-price-container {
+    padding: 0.5em;
+    background: white;
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
 }
