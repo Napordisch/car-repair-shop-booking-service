@@ -1,0 +1,71 @@
+body {
+    font-family: Inter, Arial, sans-serif;
+    margin-left: 3em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.services {
+    max-width: 700px;
+}
+
+input[type="checkbox"] {
+    accent-color: black;
+    border-radius: 0;
+    background-color: white;
+    height: 1.5em;
+    width: 1.5em;
+    font-size: 1em;
+}
+
+h1 {
+    font-size: 3em;
+}
+
+p {
+    font-size: 1em;
+}
+
+h3 {
+    font-size: 1.22em;
+}
+
+.service {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1em;
+    margin: 2em 0em;
+}
+
+.service * {
+    margin: 0px;
+}
+
+.service-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    width: 100%;
+}
+
+.service-name-and-price {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.service-name-and-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+}
+
+.service-chosen {
+    position: absolute;
+    left: -2em;
+
+}

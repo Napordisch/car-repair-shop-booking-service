@@ -3,76 +3,12 @@
 
 <head>
     <meta charset="utf-8">
-    <style>
-        body {
-            font-family: Inter, Arial, sans-serif;
-            margin-left: 3em;
-        }
-
-        input[type="checkbox"] {
-            accent-color: black;
-            border-radius: 0;
-            background-color: white;
-            height: 1.5em;
-            width: 1.5em;
-            font-size: 1em;
-        }
-
-        h1 {
-            font-size: 3em;
-        }
-
-        p {
-            font-size: 1em;
-        }
-
-        h3 {
-            font-size: 1.22em;
-        }
-
-        .service {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 1em;
-            margin: 2em 0em;
-        }
-
-        .service * {
-            margin: 0px;
-        }
-
-        .service-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5em;
-            width: 100%;
-        }
-
-        .service-name-and-price {
-            display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-
-        .service-name-and-checkbox {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            position: relative;
-        }
-
-        .service-chosen {
-            position: absolute;
-            left: -2em;
-
-        }
-    </style>
+    <link rel="stylesheet" href="main-styles.css">
     <title>Автосервис</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
@@ -80,74 +16,71 @@
 </head>
 
 <body>
-    <h1>
-        Услуги
-    </h1>
+    <div class="services">
+        <h1>
+            Услуги
+        </h1>
 
+        <div class="service">
 
+            <!-- <input type="checkbox"> -->
+            <div class="service-info">
+                <div class="service-name-and-price">
+                    <div class="service-name-and-checkbox">
+                        <input type="checkbox" class="service-chosen">
+                        <h3 class="service-name">Полная диагностика</h3>
+                    </div>
 
-
-    <div class="service">
-
-        <!-- <input type="checkbox"> -->
-        <div class="service-info">
-            <div class="service-name-and-price">
-                <div class="service-name-and-checkbox">
-                    <input type="checkbox" class="service-chosen">
-                    <h3 class="service-name">Полная диагностика</h3>
+                    <p class="price">5000 ₽</p>
                 </div>
 
-                <p class="price">5000 ₽</p>
+                <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk
+                    ;alsdkfj;
+                    a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                    a;lsdfkjals;df </p>
             </div>
 
-            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
-                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
-                a;lsdfkjals;df </p>
         </div>
+        <div class="service">
 
-    </div>
-    <div class="service">
+            <!-- <input type="checkbox"> -->
+            <div class="service-info">
+                <div class="service-name-and-price">
+                    <div class="service-name-and-checkbox">
+                        <input type="checkbox" class="service-chosen">
+                        <h3 class="service-name">Полная диагностика</h3>
+                    </div>
 
-        <!-- <input type="checkbox"> -->
-        <div class="service-info">
-            <div class="service-name-and-price">
-                <div class="service-name-and-checkbox">
-                    <input type="checkbox" class="service-chosen">
-                    <h3 class="service-name">Полная диагностика</h3>
+                    <p class="price">5000 ₽</p>
                 </div>
 
-                <p class="price">5000 ₽</p>
+                <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk
+                    ;alsdkfj;
+                    a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                    a;lsdfkjals;df </p>
             </div>
 
-            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
-                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
-                a;lsdfkjals;df </p>
         </div>
+        <div class="service">
 
-    </div>
-    <div class="service">
+            <!-- <input type="checkbox"> -->
+            <div class="service-info">
+                <div class="service-name-and-price">
+                    <div class="service-name-and-checkbox">
+                        <input type="checkbox" class="service-chosen">
+                        <h3 class="service-name">Полная диагностика</h3>
+                    </div>
 
-        <!-- <input type="checkbox"> -->
-        <div class="service-info">
-            <div class="service-name-and-price">
-                <div class="service-name-and-checkbox">
-                    <input type="checkbox" class="service-chosen">
-                    <h3 class="service-name">Полная диагностика</h3>
+                    <p class="price">5000 ₽</p>
                 </div>
 
-                <p class="price">5000 ₽</p>
+                <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk
+                    ;alsdkfj;
+                    a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                    a;lsdfkjals;df </p>
             </div>
-
-            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
-                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
-                a;lsdfkjals;df </p>
         </div>
-
     </div>
-
-
-
-
 </body>
 
 </html>
