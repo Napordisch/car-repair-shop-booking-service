@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, 'pages', 'static')))
 
 
-app.get('/', (req, res) => {р
+app.get('/', (req, res) => {
     res.sendFile('main.html', { root: path.join(__dirname, "pages") });
 })
 
