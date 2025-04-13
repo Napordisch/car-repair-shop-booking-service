@@ -1,0 +1,1 @@
+docker build . -t car-repair-shop-booking-service && docker run -p 3000:3000 -v ./data:/app/data car-repair-shop-booking-service 
