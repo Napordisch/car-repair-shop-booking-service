@@ -1,12 +1,21 @@
 import express from 'express';
 import * as db from './db.js';
 
-const app = express();
-app.use(express.json());
-const port = 3000;
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import * as path from 'path';
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+const port = 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const app = express();
+
+app.use(express.json());
+app.use('/static', express.static(path.join(__dirname, 'pages', 'static')))
+
+
+app.get('/', (req, res) => {р
+    res.sendFile('main.html', { root: path.join(__dirname, "pages") });
 })
 
 app.listen(port, () => {
