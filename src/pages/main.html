@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 
-    <head>
-        <style>
-body {
-    font-family: inter, sans-serif;
-    max-width: 500px;
-}
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Inter, Arial, sans-serif;
+            margin-left: 3em;
+        }
 
         input[type="checkbox"] {
             accent-color: black;
             border-radius: 0;
+            background-color: white;
+            height: 1.5em;
+            width: 1.5em;
+            font-size: 1em;
         }
 
         h1 {
@@ -24,87 +29,125 @@ body {
         h3 {
             font-size: 1.22em;
         }
+
         .service {
             display: flex;
             flex-direction: row;
-            align-items: baseline;
-            gap: 0.5em;
+            align-items: flex-start;
+            gap: 1em;
+            margin: 2em 0em;
         }
 
-        .service-name-and-description {
-            display: block;
+        .service * {
+            margin: 0px;
+        }
+
+        .service-info {
+            display: flex;
             flex-direction: column;
-            gap: 0.2em;
-            line-height: 0.2em;
+            gap: 0.5em;
+            width: 100%;
         }
 
-        </style>
-        <title>Автосервис</title>
+        .service-name-and-price {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: space-between;
+        }
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-                href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-                rel="stylesheet">
+        .service-name-and-checkbox {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+        }
 
-    </head>
+        .service-chosen {
+            position: absolute;
+            left: -2em;
 
-    <body>
-        <h1>
-            Услуги
-        </h1>
+        }
+    </style>
+    <title>Автосервис</title>
 
-        <div class="service">
-            <h3 class="service-name">Замена масла</h3>
-            <p class="price">3000 ₽</p>
-        </div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
 
-        <div class="service">
-            <h3 class="service-name">Замена фильтров</h3>
-        </div>
+</head>
 
-        <div class="service">
-            <h3 class="service-name">Проверка и замена всех технических жидкостей</h3>
-        </div>
+<body>
+    <h1>
+        Услуги
+    </h1>
 
-        <div class="service">
 
-            <input type="checkbox">
-            <div class="service-name-and-description">
-                <h3 class="service-name">Полная диагностика</h3>
-                <p>Проверим ваш автомобиль и назначим сервис</p>
+
+
+    <div class="service">
+
+        <!-- <input type="checkbox"> -->
+        <div class="service-info">
+            <div class="service-name-and-price">
+                <div class="service-name-and-checkbox">
+                    <input type="checkbox" class="service-chosen">
+                    <h3 class="service-name">Полная диагностика</h3>
+                </div>
+
+                <p class="price">5000 ₽</p>
             </div>
 
-            <div class="service-price-and-checkbox">
-                <p class="prince">10 000 ₽</p>
+            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
+                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                a;lsdfkjals;df </p>
+        </div>
+
+    </div>
+    <div class="service">
+
+        <!-- <input type="checkbox"> -->
+        <div class="service-info">
+            <div class="service-name-and-price">
+                <div class="service-name-and-checkbox">
+                    <input type="checkbox" class="service-chosen">
+                    <h3 class="service-name">Полная диагностика</h3>
+                </div>
+
+                <p class="price">5000 ₽</p>
             </div>
 
+            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
+                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                a;lsdfkjals;df </p>
         </div>
 
-        <div class="service">
-            <h3 class="service-name">Ремонт ходовой части</h3>
+    </div>
+    <div class="service">
+
+        <!-- <input type="checkbox"> -->
+        <div class="service-info">
+            <div class="service-name-and-price">
+                <div class="service-name-and-checkbox">
+                    <input type="checkbox" class="service-chosen">
+                    <h3 class="service-name">Полная диагностика</h3>
+                </div>
+
+                <p class="price">5000 ₽</p>
+            </div>
+
+            <p class="service-description">Проверим ваш автомобиль и назначим сервис asdfl;kjasl;df a;sdflk ;alsdkfj;
+                a;lsdkfj;lkja as;dlfkjas;ldkfj asasldk;fasd;lfkj a;lskdfj a;lsdkf ;ldkfja;lsdjkf as;dlkfja;lsdkf
+                a;lsdfkjals;df </p>
         </div>
 
-        <div class="service">
-            <h3 class="service-name">Ремонт электроборудования</h3>
-        </div>
+    </div>
 
-        <div class="service">
-            <h3 class="service-name">Установка дополнительного оборудования</h3>
-        </div>
 
-        <div class="service">
-            <h3>Ремонт коробки передач</h3 class="service-name">
-        </div>
 
-        <div class="service">
-            <h3 class="service-name">Кузовной ремонт</h3>
-        </div>
 
-        <div class="service">
-            <h3 class="service-name">Ремонт и обслуживание кондиционера</h3>
-        </div>
-
-    </body>
+</body>
 
 </html>
