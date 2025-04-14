@@ -6,8 +6,8 @@ import { dirname } from 'path';
 import * as path from 'path';
 
 const port = 3000;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = import.meta.filename;
+const __dirname = import.meta.dirname;
 const app = express();
 
 app.use(express.json());
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`App listening on port ${port}`);
 })
 
 app.post('/login', async (req, res) => {
