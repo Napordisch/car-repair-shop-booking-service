@@ -162,7 +162,7 @@ router.post('/free-parking-space', async (req, res) => {
     }
 }); 
 
-router.get('/homepage', (req, res) => {
+router.get('/', (req, res) => {
     res.sendFile('admin-homepage.html', { root: path.join(__dirname, "..", "pages") });
 });
 
