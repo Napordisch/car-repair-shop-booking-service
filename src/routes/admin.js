@@ -66,4 +66,16 @@ router.get('/add-service', (req, res) => {
     res.sendFile('add-service.html', { root: path.join(__dirname, "..", "pages") });
 });
 
+router.get('/customers-management', (req, res) => {
+    res.sendFile('customers-management.html', { root: path.join(__dirname, "..", "pages") });
+});
+
+router.get('/customers', async (req, res) => {
+    const customers = await database.query('SELECT * FROM Customers');
+    res.json(customers);
+});
+
+
+
+
 export default router; 
