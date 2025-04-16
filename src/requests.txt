@@ -1,0 +1,22 @@
+curl -H 'Content-Type: application/json' \
+      -d '{ "price":"120","name":"tyre change", "description": "tyres are changed"}' \
+      -X POST \
+      http://localhost:3000/admin/add-service
+
+Invoke-RestMethod -Uri "http://localhost:3000/admin/add-service" `
+                  -Method Post `
+                  -Headers @{"Content-Type"="application/json"} `
+                  -Body ('{ "price":"120", "name":"tyre change", "description": "tyres are changed" }')
+
+Invoke-RestMethod -Uri "http://localhost:3000/admin/add-service" `
+                  -Method Post `
+                  -Headers @{"Content-Type"="application/json"} `
+                  -Body ('{ "price":"2000", "name":"oil change", "description": "oil is changed" }')
+
+Invoke-RestMethod -Uri "http://localhost:3000/admin/remove-service" `
+                  -Method Post `
+                  -Headers @{"Content-Type"="application/json"} `
+                  -Body ('{"id":"2c9e9b32-2ac4-4da9-9042-9ac6b7fac999"}')
+
+Invoke-RestMethod -Uri "http://localhost:3000/services" `
+                  -Method Get
