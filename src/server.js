@@ -152,3 +152,67 @@ app.post('/occupy-parking-space', async (req, res) => {
     }
     res.send({ message, type });
 });
+
+
+
+app.post('/create-order', async (req, res) => {
+    try {
+        const { customerId, services, parkingSpaceNumber, initialVisit, deadline } = req.body;
+
+        const missingFields = [];
+        if (!customerId) missingFields.push('customerId');
+        if (!services || !services.length) missingFields.push('services');
+        if (!initialVisit) missingFields.push('initialVisit'); 
+        if (!deadline) missingFields.push('deadline');
+
+        if (missingFields.length > 0) {
+            res.status(400).send(`Missing required fields: ${missingFields.join(', ')}`);
+            return;
+        }
+
+        // Check if customer exists
+        const customer = (await database.query('SELECT id FROM Customers WHERE id = ?', [customerId]))[0];
+        if (!customer) {
+            res.status(404).send('Customer not found');
+            return;
+        }
+
+        // Check if parking space exists and is available
+        if (parkingSpaceNumber) {
+            const parkingSpace = (await database.query('SELECT occupied FROM ParkingSpaces WHERE number = ?', [parkingSpaceNumber]))[0];
+            if (!parkingSpace) {
+                res.status(404).send('Parking space not found');
+                return;
+            }
+            if (parkingSpace.occupied) {
+                res.status(400).send('Parking space is already occupied');
+                return;
+            }
+        }
+
+        // Generate UUID for order
+        const orderId = crypto.randomUUID();
+
+        // Create order
+        await database.run(
+            'INSERT INTO Orders (id, customerID, initialVisit, deadline, services) VALUES (?, ?, ?, ?, ?)',
+            [orderId, customerId, initialVisit, deadline, services]
+        );
+
+        // If parking space specified, mark it as occupied
+        if (parkingSpaceNumber) {
+            await database.run(
+                'UPDATE ParkingSpaces SET occupied = 1, orderID = ? WHERE number = ?',
+                [orderId, parkingSpaceNumber]
+            );
+        }
+
+        res.status(201).json({ orderId });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+});
+
+

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание заказа</title>
+    <link rel="stylesheet" href="/static/css/common-styles.css">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 1em;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+        select, input {
+            width: 100%;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .services-list {
+            border: 1px solid #ddd;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.5em;
+            border-bottom: 1px solid #eee;
+        }
+        .service-item:last-child {
+            border-bottom: none;
+        }
+        .service-item > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+        }
+        .service-item p {
+            margin: 0;
+            color: #666;
+        }
+        .service-duration {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .admin-nav {
+            margin-bottom: 1em;
+        }
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 1em 0;
+            text-align: right;
+        }
+        .parking-space {
+            display: inline-block;
+            padding: 0.5em 1em;
+            margin: 0.5em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .parking-space.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .parking-space.occupied {
+            background-color: #ffebee;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+        <a href="/admin/homepage">← Управление</a>
+    </div>
+    <div class="form-container">
+        <h1>Создание заказа</h1>
+        <form id="addOrderForm">
+            <div class="form-group">
+                <label for="customer">Клиент</label>
+                <select id="customer" required>
+                    <option value="">Выберите клиента</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="initialVisit">Дата начала работ</label>
+                <input type="date" id="initialVisit" required>
+            </div>
+
+            <div class="form-group">
+                <label for="deadline">Срок выполнения</label>
+                <input type="date" id="deadline" required>
+            </div>
+
+            <div class="form-group">
+                <label>Услуги</label>
+                <div class="services-list" id="servicesList">
+                    <!-- Services will be populated here -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Парковочное место</label>
+                <div id="parkingSpacesList">
+                    <!-- Parking spaces will be populated here -->
+                </div>
+            </div>
+
+            <div class="total-price">
+                Итого: <span id="totalPrice">0</span> ₽
+            </div>
+
+            <div class="button-group">
+                <button type="button" onclick="window.location.href='/admin/order-management'">Отмена</button>
+                <button type="submit">Создать заказ</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let selectedServices = new Set();
+        let totalPrice = 0;
+
+        // Load customers
+        fetch('/admin/customers')
+            .then(response => response.json())
+            .then(customers => {
+                const select = document.getElementById('customer');
+                customers.forEach(customer => {
+                    const option = document.createElement('option');
+                    option.value = customer.id;
+                    option.textContent = `${customer.firstName} ${customer.lastName || ''} (${customer.phoneNumber})`;
+                    select.appendChild(option);
+                });
+            });
+
+        // Add price formatting function
+        function formatPrice(price) {
+            return price.toLocaleString('ru-RU');
+        }
+
+        // Load services
+        function loadServices() {
+            fetch('/services')
+                .then(response => response.json())
+                .then(services => {
+                    const servicesList = document.getElementById('servicesList');
+                    servicesList.innerHTML = '';
+                    
+                    services.forEach(service => {
+                        const serviceDiv = document.createElement('div');
+                        serviceDiv.className = 'service-item';
+                        serviceDiv.innerHTML = `
+                            <div>
+                                <div>
+                                    <input type="checkbox" id="service-${service.id}" value="${service.id}">
+                                    <label for="service-${service.id}">${service.name} - ${formatPrice(service.price)} ₽</label>
+                                </div>
+                                <p class="service-duration">Длительность: ${formatDuration(service.duration)}</p>
+                                <p>${service.description}</p>
+                            </div>
+                        `;
+                        servicesList.appendChild(serviceDiv);
+
+                        // Add event listener for checkbox
+                        const checkbox = serviceDiv.querySelector('input[type="checkbox"]');
+                        checkbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                selectedServices.add(service.id);
+                                totalPrice += service.price;
+                            } else {
+                                selectedServices.delete(service.id);
+                                totalPrice -= service.price;
+                            }
+                            updateTotalPrice();
+                        });
+                    });
+                });
+        }
+
+        // Load parking spaces
+        function loadParkingSpaces() {
+            fetch('/admin/parking-spaces')
+                .then(response => response.json())
+                .then(spaces => {
+                    const container = document.getElementById('parkingSpacesList');
+                    container.innerHTML = '';
+                    
+                    spaces.forEach(space => {
+                        const spaceElement = document.createElement('div');
+                        spaceElement.className = `parking-space ${space.occupied ? 'occupied' : ''}`;
+                        spaceElement.textContent = space.number;
+                        
+                        if (!space.occupied) {
+                            spaceElement.addEventListener('click', function() {
+                                // Remove selected class from all spaces
+                                document.querySelectorAll('.parking-space').forEach(el => {
+                                    el.classList.remove('selected');
+                                });
+                                // Add selected class to clicked space
+                                this.classList.add('selected');
+                            });
+                        }
+                        
+                        container.appendChild(spaceElement);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading parking spaces:', error);
+                    alert('Ошибка при загрузке парковочных мест');
+                });
+        }
+
+        document.getElementById('addOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (selectedServices.size === 0) {
+                alert('Выберите хотя бы одну услугу');
+                return;
+            }
+
+            const selectedSpace = document.querySelector('.parking-space.selected');
+            if (!selectedSpace) {
+                alert('Выберите парковочное место');
+                return;
+            }
+
+            const order = {
+                customerId: document.getElementById('customer').value,
+                initialVisit: document.getElementById('initialVisit').value,
+                deadline: document.getElementById('deadline').value,
+                parkingSpaceNumber: parseInt(selectedSpace.textContent),
+                services: Array.from(selectedServices)
+            };
+
+            fetch('/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/admin/order-management';
+                } else {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при создании заказа');
+            });
+        });
+
+        // Update total price display to use Russian notation
+        function updateTotalPrice() {
+            document.getElementById('totalPrice').textContent = formatPrice(totalPrice);
+        }
+
+        // Load services and parking spaces when page loads
+        loadServices();
+        loadParkingSpaces();
+
+        // Add duration formatting function
+        function formatDuration(seconds) {
+            const days = Math.floor(seconds / (24 * 60 * 60));
+            seconds %= 24 * 60 * 60;
+            const hours = Math.floor(seconds / (60 * 60));
+            seconds %= 60 * 60;
+            const minutes = Math.floor(seconds / 60);
+            seconds %= 60;
+
+            let result = '';
+            if (days > 0) result += `${days} дн. `;
+            if (hours > 0) result += `${hours} ч. `;
+            if (minutes > 0) result += `${minutes} мин. `;
+            if (seconds > 0 || result === '') result += `${seconds} сек.`;
+
+            return result.trim();
+        }
+    </script>
+</body>
+</html> 

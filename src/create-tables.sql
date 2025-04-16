@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS "Orders" (
     id TEXT PRIMARY KEY,
     deadline DATE NOT NULL,
     initialVisit DATE NOT NULL,
-    customerID TEXT NOT NULL
+    customerID TEXT NOT NULL,
+    services TEXT NOT NULL
 );
 
 -- Create ParkingSpaces table if it doesn't exist

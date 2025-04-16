@@ -166,5 +166,38 @@ router.get('/homepage', (req, res) => {
     res.sendFile('admin-homepage.html', { root: path.join(__dirname, "..", "pages") });
 });
 
+router.get('/order-management', (req, res) => {
+    res.sendFile('order-management.html', { root: path.join(__dirname, "..", "pages") });
+}); 
+
+router.get('/orders', async (req, res) => {
+    try {
+        const orders = await database.query('SELECT * FROM Orders');
+        res.json(orders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching orders');
+    }
+});
+
+router.delete('/orders', async (req, res) => {
+    try {
+        const { id } = req.body;
+        await database.run('DELETE FROM Orders WHERE id = ?', [id]);
+        res.status(200).send('Order deleted successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error deleting order');
+    }
+});
+
+
+router.get('/add-order', (req, res) => {
+    res.sendFile('add-order.html', { root: path.join(__dirname, "..", "pages") });
+});
+
+
+
+
 
 export default router; 
