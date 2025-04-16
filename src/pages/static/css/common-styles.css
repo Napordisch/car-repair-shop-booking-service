@@ -28,3 +28,8 @@ button {
 button:active {
     background-color: rgb(71, 71, 71);
 }
+
+a {
+    text-decoration-thickness: .3px;
+    text-underline-offset: 0.1em;
+}

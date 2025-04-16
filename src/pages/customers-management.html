@@ -29,9 +29,17 @@
             }
         }
     </script>
+    <style>
+        .admin-nav {
+            margin-bottom: 1em;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="admin-nav">
+        <a href="/admin/homepage">← Управление</a>
+    </div>
     <h1>Клиенты</h1>
     <button onclick="window.location.href='/admin/add-customer'">Добавить клиента</button>
     <table>
@@ -56,10 +64,10 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                                 <td>${customer.id}</td>
-                                <td>${customer.firstName}</td>
-                                <td>${customer.lastName}</td>
-                                <td>${customer.phoneNumber}</td>
-                                <td>${customer.email}</td>
+                                <td>${customer.firstName || ''}</td>
+                                <td>${customer.lastName || ''}</td>
+                                <td>${customer.phoneNumber || ''}</td>
+                                <td>${customer.email || ''}</td>
                                 <td>
                                     <button onclick="deleteCustomer('${customer.id}')">Удалить</button>
                                 </td>

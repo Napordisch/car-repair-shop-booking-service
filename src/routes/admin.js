@@ -137,7 +137,34 @@ router.get('/parking-spaces-management', (req, res) => {
 }); 
 
 
+router.post('/free-parking-space', async (req, res) => {
+    try {
+        const { number } = req.body;
 
+        const parkingSpace = (await database.query('SELECT occupied FROM ParkingSpaces WHERE number = ?', [number]))[0];
+        if (!parkingSpace) {
+            res.status(404).send('Парковочное место не найдено');
+            return;
+        }
+
+        if (!parkingSpace.occupied) {
+            console.log(parkingSpace.occupied);
+            res.status(400).send('Парковочное место не занято');
+            return;
+        }
+
+        await database.run('UPDATE ParkingSpaces SET occupied = 0 WHERE number = ?', [number]);
+        res.status(200).send('Парковочное место освобождено успешно');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+}); 
+
+router.get('/homepage', (req, res) => {
+    res.sendFile('admin-homepage.html', { root: path.join(__dirname, "..", "pages") });
+});
 
 
 export default router; 

@@ -111,3 +111,44 @@ app.post('/register', async (req, res) => {
     }
     res.send({ message, type });
 });
+
+app.post('/occupy-parking-space', async (req, res) => {
+    let message;
+    let type;
+    try {
+        const { number, registrationNumber, orderID } = req.body;
+
+        // Check if parking space exists
+        const parkingSpace = await database.query('SELECT occupied FROM ParkingSpaces WHERE number = ?', [number]);
+        if (!parkingSpace.length) {
+            throw new Error('parking space not found');
+        }
+
+        // Check if parking space is already occupied
+        if (parkingSpace[0].occupied) {
+            throw new Error('parking space already occupied');
+        }
+
+        // Update parking space
+        await database.run(
+            'UPDATE ParkingSpaces SET registrationNumber = ?, orderID = ?, occupied = 1 WHERE number = ?',
+            [registrationNumber, orderID, number]
+        );
+        res.status(200);
+
+    } catch (error) {
+        console.error(error.message);
+        message = error.message;
+        if (message === 'parking space not found') {
+            type = 'NOT_FOUND';
+            res.status(404);
+        } else if (message === 'parking space already occupied') {
+            type = 'ALREADY_OCCUPIED';
+            res.status(409);
+        } else {
+            type = 'UNKNOWN';
+            res.status(500);
+        }
+    }
+    res.send({ message, type });
+});

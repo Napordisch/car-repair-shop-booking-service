@@ -4,12 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление услугами</title>
+    <title>Услуги</title>
     <link rel="stylesheet" href="/static/css/common-styles.css">
+    <style>
+        .admin-nav {
+            margin-bottom: 1em;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Управление услугами</h1>
+    <div class="admin-nav">
+        <a href="/admin/homepage">← Управление</a>
+    </div>
+    <h1>Услуги</h1>
     <button class="add-service-button" onclick="window.location.href='/admin/add-service'">Добавить услугу</button>
     <table>
         <thead>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/css/common-styles.css">
-    <title>Управление парковочными местами</title>
+    <title>Парковочные места</title>
 
     <style>
         table {
@@ -28,11 +28,18 @@
         .controls {
             margin: 1em 0;
         }
+
+        .admin-nav {
+            margin-bottom: 1em;
+        }
     </style>
 </head>
 
 <body>
-    <h1>Управление парковочными местами</h1>
+    <div class="admin-nav">
+        <a href="/admin/homepage">← Управление</a>
+    </div>
+    <h1>Парковочные места</h1>
 
     <div class="controls">
         <input type="number" id="new-space-number" placeholder="Номер места">
@@ -75,8 +82,9 @@
                             <td>${space.occupied ? `Занято: ${space.registrationNumber}` : 'Свободно'}</td>
                             <td>
                                 ${!space.occupied ? 
-                                    `<button onclick="removeParkingSpace(${space.number})">Удалить</button>` :
-                                    ''
+                                    `<button onclick="occupyParkingSpace(${space.number})">Занять</button>
+                                     <button onclick="removeParkingSpace(${space.number})">Удалить</button>` :
+                                    `<button onclick="freeParkingSpace(${space.number})">Освободить</button>`
                                 }
                             </td>
                         `;
@@ -141,6 +149,51 @@
             })
             .catch(error => {
                 console.error('Error removing parking space:', error);
+                alert(error.message);
+            });
+        }
+
+        function occupyParkingSpace(number) {
+            const registrationNumber = prompt('Введите номер автомобиля:');
+            if (!registrationNumber) return;
+
+            fetch('/occupy-parking-space', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ number, registrationNumber })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                loadParkingSpaces();
+            })
+            .catch(error => {
+                console.error('Error occupying parking space:', error);
+                alert(error.message);
+            });
+        }
+
+        function freeParkingSpace(number) {
+            if (!confirm(`Освободить место №${number}?`)) return;
+
+            fetch('/admin/free-parking-space', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ number })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                loadParkingSpaces();
+            })
+            .catch(error => {
+                console.error('Error freeing parking space:', error);
                 alert(error.message);
             });
         }
