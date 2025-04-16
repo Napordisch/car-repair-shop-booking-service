@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS "Orders" (
 -- Create ParkingSpaces table if it doesn't exist
 CREATE TABLE IF NOT EXISTS ParkingSpaces (
     number INTEGER PRIMARY KEY,
-    registrationNumber TEXT NOT NULL,
+    registrationNumber TEXT,
     occupied BOOLEAN NOT NULL DEFAULT 0,
-    orderID TEXT NOT NULL
+    orderID TEXT
 );
 

@@ -1,7 +1,6 @@
 import express from 'express';
 import database from '../db.js';
 import { v4 as uuidv4 } from 'uuid';
-import { addCustomer } from '../shared-management.js';
 import path from 'path';
 const __dirname = import.meta.dirname;
 const router = express.Router();
@@ -79,9 +78,9 @@ router.post('/create-parking-space', async (req, res) => {
         const { number } = req.body;
 
         // Check if parking space number already exists
-        const existingSpace = await database.get('SELECT number FROM ParkingSpaces WHERE number = ?', [number]);
-        if (existingSpace) {
-            res.status(400).send('Parking space with this number already exists');
+        const existingSpace = await database.query('SELECT number FROM ParkingSpaces WHERE number = ?', [number]);
+        if (existingSpace.length > 0) {
+            res.status(400).send('Парковочное место с таким номером уже существует');
             return;
         }
 
@@ -90,7 +89,7 @@ router.post('/create-parking-space', async (req, res) => {
             [number]
         );
 
-        res.status(200).send('Parking space created successfully');
+        res.status(200).send('Парковочное место создано успешно');
     } catch (error) {
         console.error(error);
         res.status(500).send(error.message);
@@ -102,26 +101,40 @@ router.delete('/remove-parking-space', async (req, res) => {
         const { number } = req.body;
 
         // Check if parking space exists and is not occupied
-        const parkingSpace = await database.get('SELECT occupied FROM ParkingSpaces WHERE number = ?', [number]);
+        const parkingSpace = await database.query('SELECT occupied FROM ParkingSpaces WHERE number = ?', [number]);
         
         if (!parkingSpace) {
-            res.status(404).send('Parking space not found');
+            res.status(404).send('Парковочное место не найдено');
             return;
         }
 
         if (parkingSpace.occupied) {
-            res.status(400).send('Cannot remove occupied parking space');
+            res.status(400).send('Невозможно удалить занятое парковочное место');
             return;
         }
 
         await database.run('DELETE FROM ParkingSpaces WHERE number = ?', [number]);
-        res.status(200).send('Parking space removed successfully');
+        res.status(200).send('Парковочное место удалено успешно');
 
     } catch (error) {
         console.error(error);
         res.status(500).send(error.message);
     }
 });
+
+router.get('/parking-spaces', async (req, res) => {
+    try {
+        const parkingSpaces = await database.query('SELECT * FROM ParkingSpaces');
+        res.status(200).json(parkingSpaces);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+});
+
+router.get('/parking-spaces-management', (req, res) => {
+    res.sendFile('parking-spaces-management.html', { root: path.join(__dirname, "..", "pages") });
+}); 
 
 
 
