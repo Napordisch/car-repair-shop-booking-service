@@ -22,7 +22,7 @@ class Database {
     }
 
     async initialize() {
-        if (fs.existsSync(this.dbPath)) {
+        if (fs.existsSync(path.dirname(this.dbPath))) {
             console.log('Database file already exists');
         } else {
             fs.mkdirSync(path.dirname(this.dbPath));

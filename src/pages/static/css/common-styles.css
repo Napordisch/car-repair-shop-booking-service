@@ -2,6 +2,14 @@ body {
     font-family: Inter, Arial, sans-serif;
 }
 
+th {
+    font-size: 1em;
+}
+th, td {
+  text-align: left;
+  padding: 0.3em;
+}
+
 input[type="checkbox"] {
     accent-color: black;
     border-radius: 0;

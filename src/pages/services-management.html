@@ -24,6 +24,23 @@
         </thead>
         <tbody>
             <script>
+                function formatDuration(seconds) {
+                    const days = Math.floor(seconds / (24 * 60 * 60));
+                    seconds %= 24 * 60 * 60;
+                    const hours = Math.floor(seconds / (60 * 60));
+                    seconds %= 60 * 60;
+                    const minutes = Math.floor(seconds / 60);
+                    seconds %= 60;
+
+                    let result = '';
+                    if (days > 0) result += `${days} дн. `;
+                    if (hours > 0) result += `${hours} ч. `;
+                    if (minutes > 0) result += `${minutes} мин. `;
+                    if (seconds > 0 || result === '') result += `${seconds} сек.`;
+
+                    return result.trim();
+                }
+
                 fetch('/services')
                     .then(response => {
                         if (!response.ok) {
@@ -40,7 +57,7 @@
                                 <td>${service.name}</td>
                                 <td>${service.description}</td>
                                 <td>${service.price} ₽</td>
-                                <td>${service.duration} сек</td>
+                                <td>${formatDuration(service.duration)}</td>
                                 <td>
                                     <button onclick="deleteService('${service.id}')">Удалить</button>
                                 </td>

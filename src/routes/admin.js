@@ -43,19 +43,34 @@ router.post('/remove-service', async (req, res) => {
 
 router.post('/add-customer', async (req, res) => {
     let message;
+    let type;
     try {
         await addCustomer(req.body);
         res.status(201);
     } catch (error) {
-        console.error(error);
+        console.error(error.message, ":", req.body);
         message = error.message;
         if (message === 'phone number already exists') {
+            type = 'DUPLICATE_PHONE';
             res.status(409);
+        } else if (message === 'invalid phone number format') {
+            type = 'INVALID_PHONE';
+            res.status(400);
+        } else if (message === 'invalid email format') {
+            type = 'INVALID_EMAIL'; 
+            res.status(400);
+        } else if (message === 'firstName is required') {
+            type = 'MISSING_FIRST_NAME';
+            res.status(400);
+        } else if (message === 'phoneNumber is required') {
+            type = 'MISSING_PHONE';
+            res.status(400);
         } else {
+            type = 'UNKNOWN';
             res.status(500);
         }
     }
-    res.send(message);
+    res.send({ message, type });
 });
 
 router.get('/services-management', (req, res) => {
@@ -76,6 +91,8 @@ router.get('/customers', async (req, res) => {
 });
 
 
-
+router.get('/add-customer', (req, res) => {
+    res.sendFile('add-customer.html', { root: path.join(__dirname, "..", "pages") });
+});
 
 export default router; 

@@ -16,7 +16,7 @@ export async function addCustomer(customerData) {
     }
 
     // Validate phone number format
-    if (!isMobilePhone(customerData.phoneNumber)) {
+    if (!isMobilePhone(customerData.phoneNumber, 'ru-RU')) {
         throw new Error('invalid phone number format');
     }
 

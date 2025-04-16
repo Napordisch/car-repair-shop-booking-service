@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Управление клиентами</title>
+    <title>Клиенты</title>
     <link rel="stylesheet" href="/static/css/common-styles.css">
 </head>
 
 <body>
-    <h1>Управление клиентами</h1>
+    <h1>Клиенты</h1>
+    <button onclick="window.location.href='/admin/add-customer'">Добавить клиента</button>
     <table>
         <thead>
             <tr>
@@ -22,9 +23,9 @@
         </thead>
         <tbody>
         </tbody>
-
         <script>
-            fetch('/customers')
+
+            fetch('/admin/customers')
                 .then(response => response.json())
                 .then(customers => {
                     const tbody = document.querySelector('tbody');

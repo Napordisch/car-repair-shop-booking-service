@@ -48,6 +48,32 @@
             background-color: #f0f0f0;
             color: black;
         }
+        .duration-inputs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .duration-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .duration-group label {
+            font-size: 0.9em;
+            margin-bottom: 2px;
+        }
+        .duration-group input {
+            width: 100%;
+        }
+        .duration-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+        .duration-preview strong {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
@@ -70,8 +96,26 @@
             </div>
             
             <div class="form-group">
-                <label for="duration">Длительность (в секундах):</label>
-                <input type="number" id="duration" name="duration" min="1" required>
+                <label>Длительность:</label>
+                <div class="duration-inputs">
+                    <div class="duration-group">
+                        <label for="days">Дни</label>
+                        <input type="number" id="days" name="days" min="0" value="0">
+                    </div>
+                    <div class="duration-group">
+                        <label for="hours">Часы</label>
+                        <input type="number" id="hours" name="hours" min="0"  value="0">
+                    </div>
+                    <div class="duration-group">
+                        <label for="minutes">Минуты</label>
+                        <input type="number" id="minutes" name="minutes" min="0"  value="0">
+                    </div>
+                    <div class="duration-group">
+                        <label for="seconds">Секунды</label>
+                        <input type="number" id="seconds" name="seconds" min="0"  value="0">
+                    </div>
+                </div>
+
             </div>
             
             <div class="button-group">
@@ -84,12 +128,30 @@
     <script>
         document.getElementById('addServiceForm').onsubmit = async (e) => {
             e.preventDefault();
+            
+            // Get duration values
+            const days = parseInt(document.getElementById('days').value) || 0;
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            
+            // Calculate total duration in seconds
+            const totalSeconds = (days * 24 * 60 * 60) + 
+                               (hours * 60 * 60) + 
+                               (minutes * 60) + 
+                               seconds;
+            
+            if (totalSeconds < 1) {
+                alert('Длительность должна быть не менее 1 секунды');
+                return;
+            }
+
             const formData = new FormData(e.target);
             const data = {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
-                duration: parseInt(formData.get('duration'))
+                duration: totalSeconds
             };
 
             try {
@@ -112,6 +174,78 @@
                 alert('Произошла ошибка при добавлении услуги');
             }
         };
+
+        function normalizeTimeUnits() {
+            const secondsInput = document.getElementById('seconds');
+            const minutesInput = document.getElementById('minutes');
+            const hoursInput = document.getElementById('hours');
+            const daysInput = document.getElementById('days');
+
+            let seconds = parseInt(secondsInput.value) || 0;
+            let minutes = parseInt(minutesInput.value) || 0;
+            let hours = parseInt(hoursInput.value) || 0;
+            let days = parseInt(daysInput.value) || 0;
+
+            // Normalize seconds to minutes
+            if (seconds >= 60) {
+                const additionalMinutes = Math.floor(seconds / 60);
+                minutes += additionalMinutes;
+                seconds = seconds % 60;
+                secondsInput.value = seconds;
+                minutesInput.value = minutes;
+            }
+
+            // Normalize minutes to hours
+            if (minutes >= 60) {
+                const additionalHours = Math.floor(minutes / 60);
+                hours += additionalHours;
+                minutes = minutes % 60;
+                minutesInput.value = minutes;
+                hoursInput.value = hours;
+            }
+
+            // Normalize hours to days
+            if (hours >= 24) {
+                const additionalDays = Math.floor(hours / 24);
+                days += additionalDays;
+                hours = hours % 24;
+                hoursInput.value = hours;
+                daysInput.value = days;
+            }
+
+            // Update the preview after normalization
+            updateDurationPreview();
+        }
+
+        // Add input validation and normalization for time fields
+        const timeInputs = document.querySelectorAll('#seconds, #minutes, #hours, #days');
+        timeInputs.forEach(input => {
+            // Handle both input and change events
+            ['input', 'change'].forEach(eventType => {
+                input.addEventListener(eventType, function() {
+                    const max = parseInt(this.getAttribute('max'));
+                    let value = parseInt(this.value) || 0;
+                    
+                    // Ensure value is not negative
+                    if (value < 0) {
+                        value = 0;
+                    }
+                    
+                    // If there's a max value, ensure we don't exceed it
+                    if (max && value > max) {
+                        value = max;
+                    }
+                    
+                    this.value = value;
+                    
+                    // Normalize all time units
+                    normalizeTimeUnits();
+                });
+            });
+        });
+
+        // Initialize the preview
+        updateDurationPreview();
     </script>
 </body>
 </html> 
