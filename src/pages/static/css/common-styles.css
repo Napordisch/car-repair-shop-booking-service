@@ -1,0 +1,22 @@
+body {
+    font-family: Inter, Arial, sans-serif;
+}
+
+input[type="checkbox"] {
+    accent-color: black;
+    border-radius: 0;
+    background-color: white;
+}
+
+button {
+    border-style: none;
+    border-radius: 0.5em;
+    height: 2em;
+    padding: 0em 0.5em;
+    background-color: black;
+    color: white;
+}
+
+button:active {
+    background-color: rgb(71, 71, 71);
+}

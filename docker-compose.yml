@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      args:
+        - NODE_ENV=production
     ports:
       - "3000:3000"
     volumes:
@@ -10,4 +13,19 @@ services:
     environment:
       - NODE_ENV=production
       - DB_PATH=/app/data/db.sqlite
-    restart: unless-stopped 
+    restart: unless-stopped
+
+  dev:
+    build:
+      context: .
+      args:
+        - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
+      - DB_PATH=/app/data/db.sqlite
+    command: npm run dev 

@@ -6,35 +6,89 @@ import * as validator from "validator";
 
 import isMobilePhoneModule from 'validator/lib/isMobilePhone.js'
 const isMobilePhone = isMobilePhoneModule.default || isMobilePhoneModule;
-import isEmail from 'validator';
+import isEmailModule from 'validator/lib/isEmail.js'
+const isEmail = isEmailModule.default || isEmailModule;
 
 const sqlite3 = sqlite3Pkg.verbose();
 
 const __dirname = import.meta.dirname;
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, "..", "data", "db.sqlite");
-const dbTableCreationScriptName = path.join(__dirname, 'create-tables.sql');
+class Database {
+    constructor() {
+        this.dbPath = process.env.DB_PATH || path.join(__dirname, "..", "data", "db.sqlite");
+        this.dbTableCreationScriptName = path.join(__dirname, 'create-tables.sql');
+        this.db = null;
+        this.initializationPromise = this.initialize();
+    }
 
-if (fs.existsSync(dbPath)) {
-    console.log(dbPath);
-    console.log('Database file already exists');
-} else {
-    fs.mkdirSync(path.dirname(dbPath));
-}
+    async initialize() {
+        if (fs.existsSync(this.dbPath)) {
+            console.log('Database file already exists');
+        } else {
+            fs.mkdirSync(path.dirname(this.dbPath));
+        }
 
-const db = new sqlite3.Database(dbPath);
+        this.db = new sqlite3.Database(this.dbPath);
 
-fs.readFile(dbTableCreationScriptName, 'utf8', (err, data) => {
-    if (err) {
-        console.error('Error reading SQL script:', err);
-    } else {
-        db.exec(data, (err) => {
-            if (err) {
-                console.error('Error initializing database:', err);
-            } else {
-                console.log('Database initialized successfully');
-            }
-            db.close();
+        try {
+            const data = await fs.promises.readFile(this.dbTableCreationScriptName, 'utf8');
+            await new Promise((resolve, reject) => {
+                this.db.exec(data, (err) => {
+                    if (err) {
+                        console.error('Error initializing database:', err);
+                        reject(err);
+                    } else {
+                        console.log('Database initialized successfully');
+                        resolve();
+                    }
+                });
+            });
+        } catch (err) {
+            console.error('Error reading SQL script:', err);
+            throw err;
+        }
+    }
+
+    async query(sql, params = []) { // read
+        await this.initializationPromise;
+        return new Promise((resolve, reject) => {
+            this.db.all(sql, params, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
         });
     }
+
+    async run(sql, params = []) { // write
+        await this.initializationPromise;
+        return new Promise((resolve, reject) => {
+            this.db.run(sql, params, function(err) {
+                if (err) reject(err);
+                else resolve(this);
+            });
+        });
+    }
+
+    close() {
+        if (this.db) {
+            this.db.close((err) => {
+                if (err) {
+                    console.error('Error closing database:', err);
+                } else {
+                    console.log('Database connection closed');
+                }
+            });
+            this.db = null;
+        }
+    }
+}
+
+// Create a singleton instance
+const database = new Database();
+
+// Ensure the database connection is closed when the process exits
+process.on('exit', () => {
+    database.close();
 });
+
+export default database;
