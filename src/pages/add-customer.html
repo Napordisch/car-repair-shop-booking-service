@@ -28,7 +28,7 @@
         </div>
         <div class="form-group">
             <label for="lastName">Фамилия</label>
-            <input type="text" id="lastName" name="lastName" required>
+            <input type="text" id="lastName" name="lastName">
         </div>
         <div class="form-group">
             <label for="phoneNumber">Телефон</label>
@@ -55,7 +55,7 @@
                 email: document.getElementById('email').value
             };
 
-            fetch('/admin/add-customer', {
+            fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

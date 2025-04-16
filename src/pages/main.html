@@ -133,6 +133,7 @@
 
 <body>
     <div class="services" id="services-list">
+
         <h1>
             Услуги
         </h1>
@@ -179,8 +180,37 @@
     </div>
     <div class="button-with-price-container">
         <div class="buy-button-with-price">
-            <button>Забронировать</button>
-            <p>15 000&nbsp₽</p>
+            <button onclick="bookServices()">Забронировать</button>
+            <p id="total-price">0 ₽</p>
+            <script>
+                document.addEventListener('change', function(e) {
+                    if (e.target.matches('.service-chosen')) {
+                        let total = 0;
+                        document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
+                            const priceText = checkbox.closest('.service').querySelector('.price').textContent;
+                            const price = parseInt(priceText.replace(/[^\d]/g, ''));
+                            total += price;
+                        });
+                        document.getElementById('total-price').textContent = total.toLocaleString('ru-RU') + ' ₽';
+                    }
+                });
+
+                function bookServices() {
+                    const selectedServices = [];
+                    document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
+                        const serviceName = checkbox.closest('.service').querySelector('.service-name').textContent;
+                        selectedServices.push(serviceName);
+                    });
+                    
+                    if (selectedServices.length === 0) {
+                        alert('Пожалуйста, выберите хотя бы одну услугу');
+                        return;
+                    } 
+
+                    // TODO: Implement booking logic
+                    console.log('Selected services:', selectedServices);
+                }
+            </script>
         </div>
     </div>
 

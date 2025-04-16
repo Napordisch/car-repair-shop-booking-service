@@ -5,6 +5,30 @@
     <meta charset="UTF-8">
     <title>Клиенты</title>
     <link rel="stylesheet" href="/static/css/common-styles.css">
+    <script>
+        function deleteCustomer(id) {
+            if (confirm('Вы уверены, что хотите удалить этого клиента?')) {
+                fetch('/admin/remove-customer', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Произошла ошибка при удалении клиента');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при удалении клиента');
+                });
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -24,7 +48,6 @@
         <tbody>
         </tbody>
         <script>
-
             fetch('/admin/customers')
                 .then(response => response.json())
                 .then(customers => {

@@ -41,38 +41,6 @@ router.post('/remove-service', async (req, res) => {
     res.send(message);
 });
 
-router.post('/add-customer', async (req, res) => {
-    let message;
-    let type;
-    try {
-        await addCustomer(req.body);
-        res.status(201);
-    } catch (error) {
-        console.error(error.message, ":", req.body);
-        message = error.message;
-        if (message === 'phone number already exists') {
-            type = 'DUPLICATE_PHONE';
-            res.status(409);
-        } else if (message === 'invalid phone number format') {
-            type = 'INVALID_PHONE';
-            res.status(400);
-        } else if (message === 'invalid email format') {
-            type = 'INVALID_EMAIL'; 
-            res.status(400);
-        } else if (message === 'firstName is required') {
-            type = 'MISSING_FIRST_NAME';
-            res.status(400);
-        } else if (message === 'phoneNumber is required') {
-            type = 'MISSING_PHONE';
-            res.status(400);
-        } else {
-            type = 'UNKNOWN';
-            res.status(500);
-        }
-    }
-    res.send({ message, type });
-});
-
 router.get('/services-management', (req, res) => {
     res.sendFile('services-management.html', { root: path.join(__dirname, "..", "pages") });
 });
@@ -94,5 +62,69 @@ router.get('/customers', async (req, res) => {
 router.get('/add-customer', (req, res) => {
     res.sendFile('add-customer.html', { root: path.join(__dirname, "..", "pages") });
 });
+
+router.delete('/remove-customer', async (req, res) => {
+    console.log('remove customer request:', req.body.id);
+    try {
+        await database.run('DELETE FROM Customers WHERE id = ?', [req.body.id]);
+        res.status(200);
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+    }
+});
+
+router.post('/create-parking-space', async (req, res) => {
+    try {
+        const { number } = req.body;
+
+        // Check if parking space number already exists
+        const existingSpace = await database.get('SELECT number FROM ParkingSpaces WHERE number = ?', [number]);
+        if (existingSpace) {
+            res.status(400).send('Parking space with this number already exists');
+            return;
+        }
+
+        await database.run(
+            'INSERT INTO ParkingSpaces (number, registrationNumber, orderID, occupied) VALUES (?, NULL, NULL, 0)',
+            [number]
+        );
+
+        res.status(200).send('Parking space created successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+});
+
+router.delete('/remove-parking-space', async (req, res) => {
+    try {
+        const { number } = req.body;
+
+        // Check if parking space exists and is not occupied
+        const parkingSpace = await database.get('SELECT occupied FROM ParkingSpaces WHERE number = ?', [number]);
+        
+        if (!parkingSpace) {
+            res.status(404).send('Parking space not found');
+            return;
+        }
+
+        if (parkingSpace.occupied) {
+            res.status(400).send('Cannot remove occupied parking space');
+            return;
+        }
+
+        await database.run('DELETE FROM ParkingSpaces WHERE number = ?', [number]);
+        res.status(200).send('Parking space removed successfully');
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+});
+
+
+
+
 
 export default router; 

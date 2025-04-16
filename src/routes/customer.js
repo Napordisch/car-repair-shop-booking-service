@@ -1,33 +1,24 @@
 import express from 'express';
 import * as db from '../db.js';
+import database from '../db.js';
+import isMobilePhoneModule from 'validator/lib/isMobilePhone.js'
+const isMobilePhone = isMobilePhoneModule.default || isMobilePhoneModule;
 
 const router = express.Router();
 
 router.post('/login', async (req, res) => {
     console.log(req.body);
-    let customerId = await db.getCustomerId(req.body.phoneNumber);
-    console.log(customerId);
+    if (!req.body.phoneNumber || !isMobilePhone(req.body.phoneNumber, 'ru-RU')) {
+        res.status(400).send('invalid phone number');
+        return;
+    }
+
+    let customerId = await database.query('SELECT id FROM Customers WHERE phoneNumber = ?', [req.body.phoneNumber]);
+
     if (customerId === null) {
         res.status(404);
     }
-    res.send();
+
+    res.send(customerId);
 });
-
-router.post('/register', async (req, res) => {
-    let message = "";
-    try {
-        await db.registerCustomer(req.body.phoneNumber, req.body.firstName);
-        res.status(201);
-    } catch (error) {
-        res.status(401);
-
-        if (error.message === 'no-first-name') {
-            message = "no-first-name";
-        } else if (error.message === 'no-phone-number') {
-            message = "no-phone-number";
-        }
-    }
-    res.send(message);
-});
-
 export default router; 
