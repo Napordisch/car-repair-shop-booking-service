@@ -1,7 +1,7 @@
 import express from 'express';
 import adminRouter from './routes/admin.js';
 import customerRouter from './routes/customer.js';
-import * as services from './services.js';
+import database from './db.js';
 
 import * as path from 'path';
 
@@ -24,7 +24,7 @@ app.listen(port, () => {
 app.get('/services', async (req, res) => {
     try {
         res.status(200);
-        res.json(await services.getAllServices());
+        res.json(await database.query('SELECT * FROM Services'));
     } catch (error) {
         console.error(error);
         res.status(404);
