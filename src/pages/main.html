@@ -5,8 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-
     <link rel="stylesheet" href="static/css/common-styles.css">
     <title>Автосервис</title>
 
@@ -183,7 +181,7 @@
             <button onclick="bookServices()">Забронировать</button>
             <p id="total-price">0 ₽</p>
             <script>
-                document.addEventListener('change', function(e) {
+                document.addEventListener('change', function (e) {
                     if (e.target.matches('.service-chosen')) {
                         let total = 0;
                         document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
@@ -201,11 +199,11 @@
                         const serviceName = checkbox.closest('.service').querySelector('.service-name').textContent;
                         selectedServices.push(serviceName);
                     });
-                    
+
                     if (selectedServices.length === 0) {
                         alert('Пожалуйста, выберите хотя бы одну услугу');
                         return;
-                    } 
+                    }
 
                     // TODO: Implement booking logic
                     console.log('Selected services:', selectedServices);
