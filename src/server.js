@@ -1,6 +1,4 @@
 import express from 'express';
-import adminRouter from './routes/admin.js';
-import customerRouter from './routes/customer.js';
 import database from './db.js';
 import isMobilePhoneModule from 'validator/lib/isMobilePhone.js'
 const isMobilePhone = isMobilePhoneModule.default || isMobilePhoneModule;
