@@ -29,7 +29,7 @@ fetch('/services')
                                     <h3 class="service-name">${new_service.name}</h3>
                                 </div>
     
-                                <p class="price">${new_service.price.toLocaleString('ru-RU')}&nbsp₽</p>
+                                <p class="price">${new_service.price.toLocaleString('ru-RU')} ₽</p>
                             </div>
     
                             <p class="service-description">${new_service.description}</p>
@@ -67,7 +67,7 @@ document.addEventListener('change', function (e) {
 
             total += price;
         });
-        document.getElementById('total-price').textContent = total.toLocaleString('ru-RU') + ' ₽';
+        document.getElementById('total-price').textContent = total.toLocaleString('ru-RU') + ' ₽';
     }
 });
 
@@ -77,30 +77,6 @@ function bookServices() {
         return;
     }
 
-    // TODO: Implement booking logic
-    const order = {
-        phone: document.getElementById('phone').value,
-        services: selectedServices
-    }
-
-    const orderString = JSON.stringify(order);
-    console.log(orderString);
-
-    fetch('/order', {
-        method: 'POST',
-        body: orderString,
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(response => {
-        if (response.ok) {
-            console.log('ok');
-        } else {
-            console.log('error');
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
-
     sessionStorage.setItem('selectedServices', JSON.stringify(selectedServices));
+    location.href = '/order';
 }

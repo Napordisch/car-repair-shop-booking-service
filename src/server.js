@@ -38,8 +38,18 @@ app.get('/order', async (req, res) => {
     res.sendFile('order.html', { root: path.join(__dirname, "pages") });
 })
 
-app.post('/order', async (req, res) => {
-    console.log(req.body);
+app.post('/get-confirmation-code', async (req, res) => {
+    const phone = req.body.phone;
+    console.log(phone);
+
+    if (!isMobilePhone(phone, 'ru-RU')) {
+        console.error("notAPhoneNumber");
+        res.status(400);
+        res.send("notAPhoneNumber");
+        return;
+    }
+    const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(confirmationCode);
     res.status(200);
-    res.send();
+    res.send(confirmationCode);
 })

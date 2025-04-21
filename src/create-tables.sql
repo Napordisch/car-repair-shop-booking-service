@@ -1,7 +1,7 @@
 -- Create Customers table if it doesn't exist
 CREATE TABLE IF NOT EXISTS Customers (
-    id TEXT PRIMARY KEY,
-    firstName TEXT NOT NULL,
+    id TEXT PRIMARY KEY UNIQUE,
+    firstName TEXT,
     lastName TEXT,
     phoneNumber TEXT NOT NULL UNIQUE,
     email TEXT
