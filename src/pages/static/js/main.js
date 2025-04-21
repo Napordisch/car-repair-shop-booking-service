@@ -1,49 +1,70 @@
+class Service {
+    constructor(id, name, price, description) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+    }
+}
 
-fetch('/services').then(response => response.json()).then(data => {
-    console.log(data);
-    data.forEach(service => {
-        const name = service.name;
-        const price = service.price;
-        console.log(service);
-        const description = service.description;
-        const serviceElement = document.createElement('div');
-        serviceElement.className = 'service';
+let services = {};
 
-        serviceElement.innerHTML = `
+fetch('/services')
+    .then(response => response.json())
+    .then(data => {
+        data.forEach(service => {
+            const new_service = new Service(service.id, service.name, service.price, service.description);
+            services[new_service.id] = new_service;
+            const serviceElement = document.createElement('div');
+
+            serviceElement.className = 'service';
+            serviceElement.id = new_service.id;
+            serviceElement.innerHTML = `
                         <label style="display:block; cursor: pointer;" class="service-label">
                         <div class="service-info">
     
                             <div class="service-name-and-price">
                                 <div class="service-name-and-checkbox">
                                     <input type="checkbox" class="service-chosen">
-                                    <h3 class="service-name">${name}</h3>
+                                    <h3 class="service-name">${new_service.name}</h3>
                                 </div>
     
-                                <p class="price">${price.toLocaleString('ru-RU')}&nbsp₽</p>
+                                <p class="price">${new_service.price.toLocaleString('ru-RU')}&nbsp₽</p>
                             </div>
     
-                            <p class="service-description">${description}</p>
+                            <p class="service-description">${new_service.description}</p>
                         </div>
                     </label>
                     `;
 
-        document.getElementById('services-list').appendChild(serviceElement);
+            document.getElementById('services-list').appendChild(serviceElement);
 
+        });
+
+        // make button with price right aligned with the services list
+        const servicesListWidth = document.getElementById('services-list').offsetWidth;
+        const buttonContainer = document.querySelector('.button-with-price-container');
+        buttonContainer.style.maxWidth = servicesListWidth + 'px';
+
+        sessionStorage.setItem('services', JSON.stringify(services));
     });
-    const servicesListWidth = document.getElementById('services-list').offsetWidth;
-    console.log(servicesListWidth);
-    const buttonContainer = document.querySelector('.button-with-price-container');
-    buttonContainer.style.maxWidth = servicesListWidth + 'px';
-});
 
 
+let selectedServices = [];
 
 document.addEventListener('change', function (e) {
+    console.log(e);
     if (e.target.matches('.service-chosen')) {
         let total = 0;
         document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
-            const priceText = checkbox.closest('.service').querySelector('.price').textContent;
-            const price = parseInt(priceText.replace(/[^\d]/g, ''));
+            const serviceId = checkbox.closest('.service').id;
+            selectedServices.push(serviceId);
+
+            const price = parseInt(services[serviceId]
+                .price
+                .toLocaleString('ru-RU')
+                .replace(/[^\d]/g, ''));
+
             total += price;
         });
         document.getElementById('total-price').textContent = total.toLocaleString('ru-RU') + ' ₽';
@@ -51,17 +72,35 @@ document.addEventListener('change', function (e) {
 });
 
 function bookServices() {
-    const selectedServices = [];
-    document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
-        const serviceName = checkbox.closest('.service').querySelector('.service-name').textContent;
-        selectedServices.push(serviceName);
-    });
-
     if (selectedServices.length === 0) {
         alert('Пожалуйста, выберите хотя бы одну услугу');
         return;
     }
 
     // TODO: Implement booking logic
-    console.log('Selected services:', selectedServices);
+    const order = {
+        phone: document.getElementById('phone').value,
+        services: selectedServices
+    }
+
+    const orderString = JSON.stringify(order);
+    console.log(orderString);
+
+    fetch('/order', {
+        method: 'POST',
+        body: orderString,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log('ok');
+        } else {
+            console.log('error');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+
+    sessionStorage.setItem('selectedServices', JSON.stringify(selectedServices));
 }

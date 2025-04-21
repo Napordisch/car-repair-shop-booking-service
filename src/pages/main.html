@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="static/css/common-styles.css">
     <title>Автосервис</title>
 
+    <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="static/js/main.js"></script>
@@ -15,118 +16,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0em 3em;
-        }
-
-        .services,
-        .buy-button-with-price {
-            max-width: 700px;
-        }
-
-        input[type="checkbox"] {
-            height: 1.5em;
-            width: 1.5em;
-            font-size: 1em;
-        }
-
-        h1 {
-            font-size: 3em;
-        }
-
-        p {
-            font-size: 1em;
-        }
-
-        h3 {
-            font-size: 1.22em;
-        }
-
-        .service {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 1em;
-            margin: 2em 0em;
-        }
-
-        .service * {
-            margin: 0px;
-        }
-
-        .service-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5em;
-            width: 100%;
-        }
-
-        .service-name-and-price {
-            display: flex;
-            flex-direction: row;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 1em;
-        }
-
-        .service-name-and-checkbox {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            position: relative;
-            gap: 0.5em;
-        }
-
-        .service-chosen {
-            position: absolute;
-            left: -2em;
-
-        }
-
-        button {
-            font-size: 1em;
-        }
-
-        @media (pointer:coarse) {
-            button {
-                height: 3em;
-                padding: 0em 1em;
-            }
-
-            button:active {
-                background-color: rgb(71, 71, 71);
-            }
-
-        }
-
-        .buy-button-with-price {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: right;
-            width: 100%;
-            gap: 1em;
-        }
-
-        .button-with-price-container {
-            padding: 0.5em;
-            background: white;
-            position: sticky;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            bottom: 0;
-            width: 100%;
-        }
-
-        .service-label {
-            width: 100%;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/main.css">
 
 </head>
 
@@ -140,6 +30,7 @@
 
     </div>
     <div class="button-with-price-container">
+        <input type="tel" id="phone" placeholder="Номер телефона">
         <div class="buy-button-with-price">
             <button onclick="bookServices()">Забронировать</button>
             <p id="total-price">0 ₽</p>

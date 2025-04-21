@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS Services (
     price INTEGER NOT NULL,
     name TEXT NOT NULL UNIQUE,
     description TEXT,
-    duration INTEGER NOT NULL
+    duration INTEGER NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT 1
 );
 
 -- Create Orders table if it doesn't exist

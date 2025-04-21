@@ -26,10 +26,20 @@ app.listen(port, () => {
 app.get('/services', async (req, res) => {
     try {
         res.status(200);
-        res.json(await database.query('SELECT * FROM Services'));
+        res.json(await database.query('SELECT * FROM Services WHERE active = 1'));
     } catch (error) {
         console.error(error);
         res.status(404);
         res.send();
     }
 });
+
+app.get('/order', async (req, res) => {
+    res.sendFile('order.html', { root: path.join(__dirname, "pages") });
+})
+
+app.post('/order', async (req, res) => {
+    console.log(req.body);
+    res.status(200);
+    res.send();
+})
