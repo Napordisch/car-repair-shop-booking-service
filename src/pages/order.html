@@ -19,9 +19,11 @@
 
 <body>
     <div class="services" id="services-list">
-    </ul>
 
-    <form class="phone-form" onsubmit="requestConfirmationCode(document.getElementById('phone').value)">
+    </div>
+
+<!-- TODO (maybe) add different login methods-->
+    <form class="phone-form" onsubmit="requestSMScode(document.getElementById('phone').value);">
         <label for="phone">Номер телефона
             <input type="tel" id="phone" required>
         </label>
@@ -30,7 +32,10 @@
         </button>
     </form>
 
-    <form class="phone-confirmation-form">
+    <form class="phone-confirmation-form" onsubmit="
+                confirmCode(sessionStorage.getItem('phone'),
+                document.getElementById('phone-confirmation-code').value);">
+
         <label for="phone-confirmation-code">Код подтверждения
             <input type="text" id="phone-confirmation-code" placeholder="Код подтверждения">
         </label>

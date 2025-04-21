@@ -41,7 +41,6 @@ fetch('/services')
 
         });
 
-        // make button with price right aligned with the services list
         const servicesListWidth = document.getElementById('services-list').offsetWidth;
         const buttonContainer = document.querySelector('.button-with-price-container');
         buttonContainer.style.maxWidth = servicesListWidth + 'px';
