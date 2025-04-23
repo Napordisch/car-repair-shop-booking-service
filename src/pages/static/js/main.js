@@ -14,6 +14,12 @@ fetch('/services')
     .then(data => {
         data.forEach(service => {
             const new_service = new Service(service.id, service.name, service.price, service.description);
+            if (new_service.name == null || new_service.name.trim() == "") {
+                return;
+            }
+            if (new_service.description == null) {
+                new_service.description = "";
+            }
             services[new_service.id] = new_service;
             const serviceElement = document.createElement('div');
 

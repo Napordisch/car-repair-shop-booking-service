@@ -5,11 +5,17 @@ class AddressError extends Error {
     }
 }
 
-
 class MissingDataError extends Error {
     constructor(message) {
         super(message);
         this.name = "MissingDataError";
     }
 }
-export { AddressError, MissingDataError };
+
+class impossibleDataBaseConditionError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "ImpossibleDataBaseConditionError";
+    }
+}
+export { AddressError, MissingDataError, impossibleDataBaseConditionError };

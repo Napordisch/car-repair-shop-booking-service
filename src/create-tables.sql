@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Services (
     price INTEGER NOT NULL,
     name TEXT NOT NULL UNIQUE,
     description TEXT,
-    duration INTEGER NOT NULL, -- seconds
+    duration INTEGER NOT NULL, -- milliseconds
     active BOOLEAN NOT NULL DEFAULT 1
 );
 

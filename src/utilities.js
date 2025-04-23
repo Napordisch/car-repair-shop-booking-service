@@ -9,6 +9,18 @@ import jwt from 'jsonwebtoken';
 
 import {AddressError, MissingDataError} from "./errors.js";
 
+class TimeOfDay {
+    hours;
+    minutes;
+    constructor(hours, minutes) {
+        this.hours = parseInt(hours);
+        this.minutes = parseInt(minutes);
+    }
+}
+
+export const openingTime = new TimeOfDay(8, 0);
+export const closingTime = new TimeOfDay(22, 0);
+
 const addressType = Object.freeze({
     EMAIL: "email",
     PHONE: "phoneNumber"
@@ -64,6 +76,7 @@ function setAuthToken(res, userId) {
     });
 }
 
+// puts userID into req
 function verifyAuthToken(req, res, next) {
     const token = req.cookies.authToken;
     if (!token) {

@@ -8,21 +8,25 @@
     <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-        rel="stylesheet">
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+            rel="stylesheet">
 
     <link rel="stylesheet" href="/static/css/common-styles.css">
     <link rel="stylesheet" href="/static/css/order.css">
+
+    <script src="/static/js/userinfo.js"></script>
     <script src="/static/js/order.js"></script>
+
 </head>
 
 <body>
-    <div class="services" id="services-list">
+<div class="services" id="services-list">
 
-    </div>
+</div>
 
-<!-- TODO (maybe) add different login methods-->
+<div id="login">
     <form class="phone-form" onsubmit="requestSMScode(document.getElementById('phone').value);">
         <label for="phone">Номер телефона
             <input type="tel" id="phone" required>
@@ -39,8 +43,15 @@
         <label for="phone-confirmation-code">Код подтверждения
             <input type="text" id="phone-confirmation-code" placeholder="Код подтверждения">
         </label>
-        <button type="submit">Подтвердить номер телефона</button> 
+        <button type="submit">Подтвердить номер телефона</button>
     </form>
+</div>
 
-    <button type="submit" disabled="true" id="order-button">Оформить заказ</button>
+<select id="month-selector" onchange="updateMonthList()">
+</select>
+
+<select id="day-selector">
+</select>
+
+<button type="submit" disabled="true" id="order-button">Оформить заказ</button>
 </body>

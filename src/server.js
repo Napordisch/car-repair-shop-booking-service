@@ -5,8 +5,8 @@ import cookieParser from "cookie-parser"
 import * as jwt from 'jsonwebtoken';
 import * as path from 'path';
 
-import { Address, addressType, getAddress, setAuthToken, verifyAuthToken} from "./utilities.js";
-import {AddressError, MissingDataError} from "./errors.js";
+import { Address, addressType, getAddress, setAuthToken, verifyAuthToken, openingTime, closingTime } from "./utilities.js";
+import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
 
 const port = 3000;
 const app = express();
@@ -106,7 +106,13 @@ app.post('/confirm-code', async (req, res) => {
     res.send("invalidCode");
 });
 
-app.post('/login',verifyAuthToken, async (req, res) => {
+app.get('/user-information', verifyAuthToken, async (req, res) => {
+    const users = await database.query(`SELECT *FROM Customers WHERE id = ?;`, [req.userId]);
+    if (users.length > 1) {
+        res.status(400);
+        throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
+    }
+    console.log(users[0]);
     res.status(200);
-    res.send("authenticated");
-})
+    res.json(users[0]);
+});
