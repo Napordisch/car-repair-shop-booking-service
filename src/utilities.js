@@ -3,16 +3,11 @@ const isMobilePhone = isMobilePhoneModule.default || isMobilePhoneModule;
 import isEmailModule from 'validator/lib/isEmail.js'
 const isEmail = isEmailModule.default || isEmailModule;
 
-class AddressError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = "AddressError";
-    }
-}
+import {AddressError, MissingDataError} from "./errors.js";
 
 const addressType = Object.freeze({
-    EMAIL: 1,
-    PHONE: 2,
+    EMAIL: "email",
+    PHONE: "phoneNumber"
 });
 
 class Address {
@@ -53,4 +48,4 @@ function getAddress(req, res) {
     }
 }
 
-export {Address, addressType, AddressError, getAddress};
+export {Address, addressType, getAddress};

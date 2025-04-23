@@ -1,6 +1,8 @@
 import express from 'express';
 import database from './db.js';
-import { Address, addressType, AddressError, getAddress } from "./utilities.js";
+
+import { Address, addressType, getAddress} from "./utilities.js";
+import {AddressError, MissingDataError} from "src/errors.js";
 
 import * as path from 'path';
 
@@ -73,12 +75,20 @@ app.post('/confirm-code', async (req, res) => {
         if (addressAndCode.code === code) {
             const deletionResult = await database.run(`DELETE FROM ConfirmationCodes WHERE address = ?;`, [address.value]);
             if (deletionResult.changes > 0) {
-                console.log("deleted");
+                console.log(`deleted all codes for the user with ${address.type} ${address.value}`);
             }
 
             res.status(200);
             console.log("confirmed");
             res.send("confirmed");
+
+            const customers = await database.query(`SELECT * FROM Customers WHERE (${address.type}) = ?;`, [address.value]);
+            if (customers.length === 0) {
+                //register a user
+                console.log(`registering a user with ${address.type} number ${address.value}`)
+                await database.run(`INSERT INTO Customers (${address.type}) VALUES (?)`, [address.value]);
+            }
+
             return;
         }
     }
