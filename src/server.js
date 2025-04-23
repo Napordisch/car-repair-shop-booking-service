@@ -47,7 +47,7 @@ app.post('/get-confirmation-code', async (req, res) => {
     console.log(confirmationCode);
     await database.run(`INSERT OR IGNORE INTO ConfirmationCodes (address, code) VALUES (?, ?);`, [address.value, confirmationCode]);
     res.status(200);
-    res.send(confirmationCode);
+    res.send("codeIsSent");
 });
 
 app.post('/confirm-code', async (req, res) => {
@@ -60,18 +60,28 @@ app.post('/confirm-code', async (req, res) => {
         res.send("code is undefined");
     }
 
-    const addressCodePairs = await database.query(`SELECT 1 FROM ConfirmationCodes WHERE address = ? AND code = ? LIMIT 1;`, [address.value, code]);
-    console.log(addressCodePairs);
+    console.log(address);
+    const addressCodePairs = await database.query(`SELECT * FROM ConfirmationCodes WHERE address = ?;`, [address.value]);
     if (addressCodePairs.length === 0) {
-        res.status(400);
-        res.send("invalidCode");
-        console.error("invalidCode");
+        res.status(404);
+        res.send("noCodesForThisAddress");
+        console.log("noCodesForThisAddress");
         return;
     }
 
-    await database.run(`DELETE FROM ConfirmationCodes WHERE address = ?;`, [address.value]);
-    console.log("deleted");
+    for (const addressAndCode of addressCodePairs) {
+        if (addressAndCode.code === code) {
+            const deletionResult = await database.run(`DELETE FROM ConfirmationCodes WHERE address = ?;`, [address.value]);
+            if (deletionResult.changes > 0) {
+                console.log("deleted");
+            }
 
-    res.status(200);
-    res.send("confirmed");
+            res.status(200);
+            console.log("confirmed");
+            res.send("confirmed");
+            return;
+        }
+    }
+    res.status(401);
+    res.send("invalidCode");
 });
