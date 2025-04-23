@@ -1,13 +1,14 @@
+import {__dirname} from './config.js';
 import express from 'express';
 import database from './db.js';
-
-import { Address, addressType, getAddress} from "./utilities.js";
-import {AddressError, MissingDataError} from "src/errors.js";
-
+import cookieParser from "cookie-parser"
+import * as jwt from 'jsonwebtoken';
 import * as path from 'path';
 
+import { Address, addressType, getAddress, setAuthToken, verifyAuthToken} from "./utilities.js";
+import {AddressError, MissingDataError} from "./errors.js";
+
 const port = 3000;
-const __dirname = import.meta.dirname;
 const app = express();
 
 const AddressType = Object.freeze({
@@ -17,6 +18,8 @@ const AddressType = Object.freeze({
 
 
 app.use(express.json());
+app.use(cookieParser())
+
 app.use('/static', express.static(path.join(__dirname, 'pages', 'static')));
 
 app.get('/', (req, res) => {
@@ -52,6 +55,11 @@ app.post('/get-confirmation-code', async (req, res) => {
     res.send("codeIsSent");
 });
 
+async function registerUser(address) {
+    console.log(`registering a user with ${address.type} number ${address.value}`)
+    await database.run(`INSERT INTO Customers (${address.type}) VALUES (?)`, [address.value]);
+}
+
 app.post('/confirm-code', async (req, res) => {
     const address = getAddress(req, res);
     const code = req.body.code;
@@ -78,16 +86,18 @@ app.post('/confirm-code', async (req, res) => {
                 console.log(`deleted all codes for the user with ${address.type} ${address.value}`);
             }
 
-            res.status(200);
-            console.log("confirmed");
-            res.send("confirmed");
-
             const customers = await database.query(`SELECT * FROM Customers WHERE (${address.type}) = ?;`, [address.value]);
             if (customers.length === 0) {
-                //register a user
-                console.log(`registering a user with ${address.type} number ${address.value}`)
-                await database.run(`INSERT INTO Customers (${address.type}) VALUES (?)`, [address.value]);
+                await registerUser(address);
             }
+
+            const id = customers[0].id;
+            setAuthToken(res, id);
+
+            res.status(200);
+
+            console.log("confirmed");
+            res.send("confirmed");
 
             return;
         }
@@ -95,3 +105,8 @@ app.post('/confirm-code', async (req, res) => {
     res.status(401);
     res.send("invalidCode");
 });
+
+app.post('/login',verifyAuthToken, async (req, res) => {
+    res.status(200);
+    res.send("authenticated");
+})

@@ -13,6 +13,8 @@ services:
     environment:
       - NODE_ENV=production
       - DB_PATH=/app/data/db.sqlite
+    env_file:
+      - .env
     restart: unless-stopped
 
   dev:
@@ -28,4 +30,6 @@ services:
     environment:
       - NODE_ENV=development
       - DB_PATH=/app/data/db.sqlite
+    env_file:
+      - .env
     command: npm run dev 
