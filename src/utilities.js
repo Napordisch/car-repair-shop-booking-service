@@ -91,6 +91,7 @@ function verifyAuthToken(req, res, next) {
         next();
     });
 }
+
 /**
  * Calculates the end time of work considering shift breaks.
  * If work extends beyond the shift end, it pauses until the next shift starts.
@@ -159,10 +160,29 @@ function calculateWorkEnd(
     return cursor; // Return Date object
 }
 
+function toLocalISOString(date = new Date()) {
+    const pad = (n, width = 2) => String(n).padStart(width, '0');
+
+    const year    = date.getFullYear();
+    const month   = pad(date.getMonth() + 1);
+    const day     = pad(date.getDate());
+    const hours   = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const ms      = pad(date.getMilliseconds(), 3);
+
+    // timezoneOffset is in minutes *behind* UTC, so we invert the sign
+    const offsetMin = -date.getTimezoneOffset();
+    const sign      = offsetMin >= 0 ? '+' : '-';
+    const offsetH   = pad(Math.floor(Math.abs(offsetMin) / 60));
+    const offsetM   = pad(Math.abs(offsetMin) % 60);
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}${sign}${offsetH}:${offsetM}`;
+}
 
 // Example usage:
 // console.log(calculateWorkEnd('2025-04-24T15:30:00', 5 * 60 * 60 * 1000, 8, 0, 17, 0)); // expected pause at 17:00
 
 
 
-export {Address, addressType, getAddress, setAuthToken, verifyAuthToken, calculateWorkEnd};
+export {Address, addressType, getAddress, setAuthToken, verifyAuthToken, calculateWorkEnd, toLocalISOString};

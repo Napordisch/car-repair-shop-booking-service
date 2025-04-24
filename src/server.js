@@ -5,7 +5,17 @@ import cookieParser from "cookie-parser"
 import * as jwt from 'jsonwebtoken';
 import * as path from 'path';
 
-import { Address, addressType, getAddress, setAuthToken, verifyAuthToken, openingTime, closingTime } from "./utilities.js";
+import {
+    Address,
+    addressType,
+    getAddress,
+    setAuthToken,
+    verifyAuthToken,
+    openingTime,
+    closingTime,
+    calculateWorkEnd,
+    toLocalISOString
+} from "./utilities.js";
 import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
 
 const port = 3000;
@@ -130,3 +140,44 @@ app.get('/working-time', async (req, res) => {
         }
     });
 });
+
+app.post('/create-order', verifyAuthToken, async (req, res) => {
+    try {
+        console.log("request body: ", req.body);
+        const initialVisit = req.body.initialVisit;
+        const serviceIDs = req.body.serviceIDs;
+        console.log("initialVisit: ", initialVisit);
+        console.log(serviceIDs);
+        const services = await database.query(`SELECT *
+                                         FROM Services
+                                         WHERE id in (${serviceIDs.join(", ")})`);
+        console.log("services: ", services);
+        let durationSum = 0;
+        for (let service of services) {
+            durationSum += service.duration;
+        }
+        console.log("durationSum: ", durationSum);
+        const deadline = calculateWorkEnd(initialVisit,
+            durationSum,
+            openingTime.hours,
+            openingTime.minutes,
+            closingTime.hours,
+            closingTime.minutes);
+        const userId = req.userId;
+        const orderInsertionResult = await database.run(`INSERT INTO Orders (customerID, initialVisit, deadline)
+                      VALUES (?, ?, ?)`,
+            [userId, initialVisit, deadline]);
+        for (let serviceID of serviceIDs) {
+            database.run(`INSERT INTO OrderServices (orderID, serviceID) VALUES (?, ?)`,
+                                                    [orderInsertionResult.lastID, serviceID])
+        }
+        res.status(200);
+        res.send();
+    } catch (e) {
+        res.status(400)
+        res.send();
+        console.error(e);
+    }
+})
+
+console.log(new Date("1746118800000"));

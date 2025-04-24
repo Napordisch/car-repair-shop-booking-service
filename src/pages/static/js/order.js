@@ -1,6 +1,7 @@
 const selectedServices = JSON.parse(sessionStorage.getItem('selectedServices'));
 const services = JSON.parse(sessionStorage.getItem('services'));
 const currentMonth = new Date().getMonth(); // 0-indexed
+
 const currentYear = new Date().getFullYear();
 const currentDate = new Date().getDate(); // 1 indexed, like real dates
 console.log(currentMonth);
@@ -85,7 +86,8 @@ function confirmCode(address, code) {
 
 function addServices() {
     let list = document.getElementById("services-list");
-    for (const service of Object.values(services)) {
+    for (const serviceid of selectedServices) {
+        const service = services[serviceid];
         totalServicesPrice += service.price;
         let serviceElement = document.createElement('tr');
         serviceElement.id = "service-" + service.id;
@@ -158,9 +160,9 @@ function timeSelectorOptionsHTML() {
     console.log(openingTime);
     console.log(closingTime);
     for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
-        timeList.push(`<option value="${hour}">${hour}:00</option>`);
+        timeList.push(`<option value="${hour}:00">${hour}:00</option>`);
         if (hour !== closingTime.hours) {
-            timeList.push(`<option value="${hour}">${hour}:30</option>`);
+            timeList.push(`<option value="${hour}:30">${hour}:30</option>`);
         }
     }
     return timeList.join(`\n`);
@@ -185,3 +187,42 @@ document.addEventListener('DOMContentLoaded', async function () {
     let timeSelector = document.getElementById('time-selector');
     timeSelector.innerHTML = timeSelectorOptionsHTML();
 });
+
+function createOrder() {
+    let month = document.getElementById('month-selector').value;
+    month = (parseInt(month)+1).toString();
+    const date = document.getElementById('day-selector').value;
+    let time = document.getElementById('time-selector').value;
+
+    if (time.length < 5) {
+        time = "0" + time;
+    }
+
+    if (month.length < 2) {
+        month = "0" + month;
+    }
+    const initialVisit = currentYear.toString() + "-" + month.toString() + "-" + date.toString() + "T" + time.toString() + ":00";
+    console.log(initialVisit);
+
+    const requestBody = JSON.stringify({
+        initialVisit: initialVisit,
+        serviceIDs: selectedServices
+    });
+    console.log(requestBody);
+
+    fetch('/create-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': "application/json",
+        },
+        body: requestBody
+    })
+    .then((response) => {
+        if (response.ok) {
+            window.alert("Заказ создан");
+        }
+    }).catch(error => {
+        console.error(error);
+    })
+}
+console.log(new Date().toISOString());

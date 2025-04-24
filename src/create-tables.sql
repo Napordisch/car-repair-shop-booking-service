@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS ParkingSpaces (
 CREATE TABLE IF NOT EXISTS OrderServices (
     orderID INTEGER NOT NULL,
     serviceID INTEGER NOT NULL,
-    PRIMARY KEY (orderID, serviceID),
     FOREIGN KEY (orderID) REFERENCES "Orders"(id),
     FOREIGN KEY (serviceID) REFERENCES Services(id)
 );
