@@ -91,5 +91,78 @@ function verifyAuthToken(req, res, next) {
         next();
     });
 }
+/**
+ * Calculates the end time of work considering shift breaks.
+ * If work extends beyond the shift end, it pauses until the next shift starts.
+ * @param {string} startIsoLocal - Start time in ISO local format (e.g. '2025-04-24T08:30:00').
+ * @param {number} durationMs - Work duration in milliseconds.
+ * @param {number} shiftStartHour - Shift start hour (0-23).
+ * @param {number} shiftStartMinute - Shift start minute (0-59).
+ * @param {number} shiftEndHour - Shift end hour (0-23).
+ * @param {number} shiftEndMinute - Shift end minute (0-59).
+ * @returns {Date} - End time as a Date object in local time.
+ */
+function calculateWorkEnd(
+    startIsoLocal,
+    durationMs,
+    shiftStartHour,
+    shiftStartMinute,
+    shiftEndHour,
+    shiftEndMinute
+) {
+    // Parse the start time as local date
+    const start = new Date(startIsoLocal);
+    if (isNaN(start)) {
+        throw new Error('Invalid startIsoLocal format');
+    }
 
-export {Address, addressType, getAddress, setAuthToken, verifyAuthToken};
+    let remaining = durationMs;
+    let cursor = new Date(start);
+
+    // Helper to set time on a date
+    function setTime(date, hour, minute) {
+        const d = new Date(date);
+        d.setHours(hour, minute, 0, 0);
+        return d;
+    }
+
+    while (remaining > 0) {
+        // Determine today's shift window
+        const todayShiftStart = setTime(cursor, shiftStartHour, shiftStartMinute);
+        const todayShiftEnd = setTime(cursor, shiftEndHour, shiftEndMinute);
+
+        // If before today's shift, jump to shift start
+        if (cursor < todayShiftStart) {
+            cursor = todayShiftStart;
+        }
+
+        // If on or after shift end, move to next day's shift start
+        if (cursor >= todayShiftEnd) {
+            cursor = setTime(new Date(cursor.setDate(cursor.getDate() + 1)), shiftStartHour, shiftStartMinute);
+            continue;
+        }
+
+        // Compute available time in this shift
+        const available = todayShiftEnd - cursor;
+        if (remaining <= available) {
+            // Finish within this shift
+            cursor = new Date(cursor.getTime() + remaining);
+            remaining = 0;
+            break;
+        }
+
+        // Use up the rest of the shift and move to next day
+        remaining -= available;
+        cursor = setTime(new Date(cursor.setDate(cursor.getDate() + 1)), shiftStartHour, shiftStartMinute);
+    }
+
+    return cursor; // Return Date object
+}
+
+
+// Example usage:
+// console.log(calculateWorkEnd('2025-04-24T15:30:00', 5 * 60 * 60 * 1000, 8, 0, 17, 0)); // expected pause at 17:00
+
+
+
+export {Address, addressType, getAddress, setAuthToken, verifyAuthToken, calculateWorkEnd};
