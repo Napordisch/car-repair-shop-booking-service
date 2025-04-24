@@ -6,6 +6,7 @@ const currentDate = new Date().getDate(); // 1 indexed, like real dates
 console.log(currentMonth);
 console.log(currentYear);
 console.log(currentDate);
+let totalServicesPrice = 0;
 
 
 class DateClass{
@@ -19,16 +20,7 @@ class DateClass{
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-        });
-    });
-});
-
 function requestSMScode(phone) {
-    sessionStorage.setItem('phone', phone);
     requestConfirmationCode(phone);
 }
 
@@ -107,11 +99,45 @@ function daysOfMonthHTMLList(month) {
     return rows.join(`\n`);
 }
 
+
 function updateMonthList() {
     document.getElementById('day-selector').innerHTML = daysOfMonthHTMLList(document.getElementById('month-selector').value);
 }
 
+function addServices() {
+    let list = document.getElementById("services-list");
+    for (const service of Object.values(services)) {
+        totalServicesPrice += service.price;
+        let serviceElement = document.createElement('tr');
+        serviceElement.id = "service-" + service.id;
+
+        serviceElement.innerHTML = `
+            <td>${service.name}</td>
+            <td>${service.price.toLocaleString('ru-RU')} ₽</td>
+        `;
+
+        list.appendChild(serviceElement);
+    }
+    let total = document.createElement('tr');
+
+    total.innerHTML = `
+            <td style="font-style: italic">Всего</td>
+            <td>${totalServicesPrice.toLocaleString('ru-RU')} ₽</td>
+    `;
+    list.appendChild(total);
+
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+        });
+    });
+
+    addServices();
+
+
     let monthSelector = document.getElementById('month-selector')
     monthSelector.innerHTML = monthHTMLList();
     monthSelector.value = currentMonth;
