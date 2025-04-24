@@ -7,6 +7,23 @@ console.log(currentMonth);
 console.log(currentYear);
 console.log(currentDate);
 let totalServicesPrice = 0;
+let openingTime;
+let closingTime;
+
+async function getWorkingTime() {
+    await fetch('/working-time')
+        .then(response => response.json())
+        .then(response => {
+            openingTime = new TimeClass(response.openingTime.hours,
+                response.openingTime.minutes);
+
+            closingTime = new TimeClass(response.closingTime.hours,
+                response.closingTime.minutes);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
 
 
 class DateClass{
@@ -17,6 +34,14 @@ class DateClass{
         this.year = year;
         this.month = month;
         this.day = day;
+    }
+}
+class TimeClass{
+    hours;
+    minutes;
+    constructor(hours, minutes){
+        this.hours = parseInt(hours);
+        this.minutes = parseInt(minutes);
     }
 }
 
@@ -53,23 +78,47 @@ function confirmCode(address, code) {
                 sessionStorage.setItem('confirmed', 'true');
             }
         }).catch(error => {
-            console.error('Error:', error);
-            sessionStorage.setItem('confirmed', 'false');
-        });
+        console.error('Error:', error);
+        sessionStorage.setItem('confirmed', 'false');
+    });
+}
+
+function addServices() {
+    let list = document.getElementById("services-list");
+    for (const service of Object.values(services)) {
+        totalServicesPrice += service.price;
+        let serviceElement = document.createElement('tr');
+        serviceElement.id = "service-" + service.id;
+
+        serviceElement.innerHTML = `
+            <td>${service.name}</td>
+            <td>${service.price.toLocaleString('ru-RU')} ₽</td>
+        `;
+
+        list.appendChild(serviceElement);
+    }
+    let total = document.createElement('tr');
+
+    total.innerHTML = `
+            <td style="font-style: italic">Всего</td>
+            <td>${totalServicesPrice.toLocaleString('ru-RU')} ₽</td>
+    `;
+    list.appendChild(total);
+
 }
 
 const months = ["Январь",
-                "Февраль",
-                "Март",
-                "Апрель",
-                "Май",
-                "Июнь",
-                "Июль",
-                "Август",
-                "Сентябрь",
-                "Октябрь",
-                "Ноябрь",
-                "Декабрь"]
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь"]
 
 
 function amountOfDaysInMonth(month, year) {
@@ -104,31 +153,21 @@ function updateMonthList() {
     document.getElementById('day-selector').innerHTML = daysOfMonthHTMLList(document.getElementById('month-selector').value);
 }
 
-function addServices() {
-    let list = document.getElementById("services-list");
-    for (const service of Object.values(services)) {
-        totalServicesPrice += service.price;
-        let serviceElement = document.createElement('tr');
-        serviceElement.id = "service-" + service.id;
-
-        serviceElement.innerHTML = `
-            <td>${service.name}</td>
-            <td>${service.price.toLocaleString('ru-RU')} ₽</td>
-        `;
-
-        list.appendChild(serviceElement);
+function timeSelectorOptionsHTML() {
+    let timeList = [];
+    console.log(openingTime);
+    console.log(closingTime);
+    for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
+        timeList.push(`<option value="${hour}">${hour}:00</option>`);
+        if (hour !== closingTime.hours) {
+            timeList.push(`<option value="${hour}">${hour}:30</option>`);
+        }
     }
-    let total = document.createElement('tr');
-
-    total.innerHTML = `
-            <td style="font-style: italic">Всего</td>
-            <td>${totalServicesPrice.toLocaleString('ru-RU')} ₽</td>
-    `;
-    list.appendChild(total);
-
+    return timeList.join(`\n`);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+
+document.addEventListener('DOMContentLoaded', async function () {
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', e => {
             e.preventDefault();
@@ -137,9 +176,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     addServices();
 
-
     let monthSelector = document.getElementById('month-selector')
     monthSelector.innerHTML = monthHTMLList();
     monthSelector.value = currentMonth;
     updateMonthList();
+
+    await getWorkingTime();
+    let timeSelector = document.getElementById('time-selector');
+    timeSelector.innerHTML = timeSelectorOptionsHTML();
 });

@@ -116,3 +116,17 @@ app.get('/user-information', verifyAuthToken, async (req, res) => {
     res.status(200);
     res.json(users[0]);
 });
+
+app.get('/working-time', async (req, res) => {
+    res.status(200);
+    res.json({
+        openingTime: {
+            hours: openingTime.hours,
+            minutes: openingTime.minutes
+        },
+        closingTime: {
+            hours: closingTime.hours,
+            minutes: closingTime.minutes
+        }
+    });
+});
