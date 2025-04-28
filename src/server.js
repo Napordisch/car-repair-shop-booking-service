@@ -2,21 +2,17 @@ import {__dirname} from './config.js';
 import express from 'express';
 import database from './db.js';
 import cookieParser from "cookie-parser"
-import * as jwt from 'jsonwebtoken';
 import * as path from 'path';
 
 import {
-    Address,
-    addressType,
     getAddress,
-    setAuthToken,
-    verifyAuthToken,
     openingTime,
     closingTime,
-    calculateWorkEnd,
-    toLocalISOString
 } from "./utilities.js";
+
 import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
+import {Address, addressType} from "./Address.js";
+import {setAuthToken, verifyAuthToken} from "./Authentication.js";
 
 const port = 3000;
 const app = express();
@@ -130,54 +126,10 @@ app.get('/user-information', verifyAuthToken, async (req, res) => {
 app.get('/working-time', async (req, res) => {
     res.status(200);
     res.json({
-        openingTime: {
-            hours: openingTime.hours,
-            minutes: openingTime.minutes
-        },
-        closingTime: {
-            hours: closingTime.hours,
-            minutes: closingTime.minutes
-        }
+        openingTime: openingTime.toString(),
+        closingTime: openingTime.toString(),
     });
 });
 
 app.post('/create-order', verifyAuthToken, async (req, res) => {
-    try {
-        console.log("request body: ", req.body);
-        const initialVisit = req.body.initialVisit;
-        const serviceIDs = req.body.serviceIDs;
-        console.log("initialVisit: ", initialVisit);
-        console.log(serviceIDs);
-        const services = await database.query(`SELECT *
-                                         FROM Services
-                                         WHERE id in (${serviceIDs.join(", ")})`);
-        console.log("services: ", services);
-        let durationSum = 0;
-        for (let service of services) {
-            durationSum += service.duration;
-        }
-        console.log("durationSum: ", durationSum);
-        const deadline = calculateWorkEnd(initialVisit,
-            durationSum,
-            openingTime.hours,
-            openingTime.minutes,
-            closingTime.hours,
-            closingTime.minutes);
-        const userId = req.userId;
-        const orderInsertionResult = await database.run(`INSERT INTO Orders (customerID, initialVisit, deadline)
-                      VALUES (?, ?, ?)`,
-            [userId, initialVisit, deadline]);
-        for (let serviceID of serviceIDs) {
-            database.run(`INSERT INTO OrderServices (orderID, serviceID) VALUES (?, ?)`,
-                                                    [orderInsertionResult.lastID, serviceID])
-        }
-        res.status(200);
-        res.send();
-    } catch (e) {
-        res.status(400)
-        res.send();
-        console.error(e);
-    }
 })
-
-console.log(new Date("1746118800000"));

@@ -4,16 +4,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as validator from "validator";
 
-import isMobilePhoneModule from 'validator/lib/isMobilePhone.js'
-const isMobilePhone = isMobilePhoneModule.default || isMobilePhoneModule;
-import isEmailModule from 'validator/lib/isEmail.js'
-const isEmail = isEmailModule.default || isEmailModule;
-
 const sqlite3 = sqlite3Pkg.verbose();
 
 const __dirname = import.meta.dirname;
 
-class Database {
+export class Database {
     constructor() {
         this.dbPath = process.env.DB_PATH || path.join(__dirname, "..", "data", "db.sqlite");
         this.dbTableCreationScriptName = path.join(__dirname, 'create-tables.sql');
