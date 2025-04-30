@@ -5,9 +5,24 @@ const selectedServices = JSON.parse(sessionStorage.getItem('selectedServices'));
 const services = JSON.parse(sessionStorage.getItem('services'));
 const currentMonth = new Date().getMonth(); // 0-indexed
 
+const months = ["Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь"]
+
+
 const currentYear = new Date().getFullYear();
 const currentDate = new Date().getDate(); // 1 indexed, like real dates
 let totalServicesPrice = 0;
+
 
 async function getWorkingTime() {
     let openingTime;
@@ -25,11 +40,11 @@ async function getWorkingTime() {
     return {openingTime: TimeOfDay.fromJSON(openingTime), closingTime: TimeOfDay.fromJSON(closingTime)};
 }
 
-function requestSMScode(phone) {
-    requestConfirmationCode(phone);
+async function requestSMScode(phone) {
+    await requestConfirmationCode(phone);
 }
 
-function requestConfirmationCode(address) {
+async function requestConfirmationCode(address) {
     fetch('/get-confirmation-code', {
         method: 'POST',
         body: JSON.stringify({ address }),
@@ -41,28 +56,33 @@ function requestConfirmationCode(address) {
     });
 }
 
-function confirmCode(address, code) {
+async function confirmCode(address, code) {
+    try {
+        await fetch(`/confirm-code`, {
+            method: 'POST',
 
-    fetch(`/confirm-code`, {
-        method: 'POST',
+            body: JSON.stringify({
+                address: address,
+                code: code
+            }),
 
-        body: JSON.stringify({
-            address: address,
-            code: code
-        }),
-
-        headers: { 'Content-Type': 'application/json' }
-    }).then(response => response.text())
-        .then(data => {
-            if (data === 'confirmed') {
-            }
-        }).catch(error => {
+            headers: {'Content-Type': 'application/json'}
+        }).then(response => response.text())
+            .then(data => {
+                if (data === 'confirmed') {
+                }
+            }).catch(error => {
+            console.error('Error:', error);
+        });
+    } catch (error) {
         console.error('Error:', error);
-    });
+    }
 }
 
-function addServices() {
+async function updateServices() {
+    totalServicesPrice = 0;
     let list = document.getElementById("services-list");
+    // TODO: try to remake this by adding trs as html
     for (const serviceid of selectedServices) {
         const service = services[serviceid];
         totalServicesPrice += service.price;
@@ -86,19 +106,6 @@ function addServices() {
 
 }
 
-const months = ["Январь",
-    "Февраль",
-    "Март",
-    "Апрель",
-    "Май",
-    "Июнь",
-    "Июль",
-    "Август",
-    "Сентябрь",
-    "Октябрь",
-    "Ноябрь",
-    "Декабрь"]
-
 
 function amountOfDaysInMonth(month, year) {
     function isLeapYear(year) {
@@ -108,7 +115,7 @@ function amountOfDaysInMonth(month, year) {
     return daysPerMonth[month];
 }
 
-function monthHTMLList() {
+async function monthHTMLList() {
     let rows = [];
     for (let i = currentMonth; i <= 11; i++) {
         rows.push(`<option value="${i}">${months[i]}</option>`);
@@ -128,12 +135,11 @@ function daysOfMonthHTMLList(month) {
 }
 
 
-function updateMonthList() {
+async function updateMonthList() {
     document.getElementById('day-selector').innerHTML = daysOfMonthHTMLList(document.getElementById('month-selector').value);
 }
 
 function timeSelectorOptionsHTML(openingTime, closingTime) {
-    console.log(openingTime);
     let timeList = [];
     for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
         timeList.push(`<option value="${hour}:00">${hour}:00</option>`);
@@ -145,35 +151,57 @@ function timeSelectorOptionsHTML(openingTime, closingTime) {
 }
 
 
+async function displayIfLoggedIn() {
+    try {
+        let loggedInWidget = document.createElement('div');
+        const userInfo = await getUserInfo();
+        if (userInfo.firstName != null) {
+            loggedInWidget.insertAdjacentHTML('beforeend', `<p>Вы: ${userInfo.firstName} ${userInfo.lastName != null ? userInfo.lastName : ""}</p>`);
+        }
+        if (userInfo.phoneNumber != null) {
+            loggedInWidget.insertAdjacentHTML('beforeend', `<p>Ваш номер телефона: ${userInfo.phoneNumber}</p>`);
+        }
+        if (userInfo.email != null) {
+            loggedInWidget.insertAdjacentHTML('beforeend', `<p>Ваша почта: ${userInfo.email}</p>`);
+        }
+        if (userInfo.email != null) {
+            loggedInWidget.insertAdjacentHTML('beforeend', `<p>Ваша почта: ${userInfo.email}</p>`);
+        }
+
+        loggedInWidget.insertAdjacentHTML('beforeend', `<button id="logout-button">
+            ${userInfo.firstName != null ?
+            "Я не " + userInfo.firstName
+            : "Забронировать от другого имени"}
+        </button>`)
+
+        document.getElementById("login").innerHTML = loggedInWidget.innerHTML;
+        document.getElementById("logout-button").addEventListener("click", async function () {
+            await logout();
+            await displayIfLoggedIn()
+        })
+    } catch (error) {
+        console.error(error);
+        await showLoginForm();
+    }
+    preventReloadingOnSubmit();
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log("contentLoaded");
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-        });
-    });
-
-    let phoneForm = document.getElementsByClassName('phone-form')[0]
-    console.log(phoneForm);
-    phoneForm.addEventListener('submit', () => {
-        requestSMScode(document.getElementById('phone').value);
-    })
-
-    let confirmationCodeForm = document.getElementsByClassName('phone-confirmation-form')[0]
-    console.log(confirmationCodeForm);
-    confirmationCodeForm.addEventListener('submit', () => {
-        confirmCode(document.getElementById('phone').value, document.getElementById('phone-confirmation-code').value);
-    })
-
-    // addServices();
-
+    console.log("something's going on");
     let monthSelector = document.getElementById('month-selector')
-    monthSelector.innerHTML = monthHTMLList();
+    monthSelector.innerHTML = await monthHTMLList();
     monthSelector.value = currentMonth;
-    updateMonthList();
+    await updateMonthList();
 
-    let {openingTime, closingTime} = await getWorkingTime();
-    document.getElementById('time-selector').innerHTML = timeSelectorOptionsHTML(openingTime, closingTime);
+
+    // let {openingTime, closingTime} = await getWorkingTime();
+    getWorkingTime().then(workingTime => {
+        console.log(workingTime);
+        document.getElementById('working-time').innerHTML = timeSelectorOptionsHTML(workingTime.openingTime, workingTime.closingTime);;
+    });
+    // document.getElementById('time-selector').innerHTML = timeSelectorOptionsHTML(openingTime, closingTime);
+
+    await displayIfLoggedIn();
 });
 
 function createOrder() {
@@ -203,11 +231,64 @@ function createOrder() {
         },
         body: requestBody
     })
-    .then((response) => {
-        if (response.ok) {
-            window.alert("Заказ создан");
-        }
-    }).catch(error => {
+        .then((response) => {
+            if (response.ok) {
+                window.alert("Заказ создан");
+            }
+        }).catch(error => {
         console.error(error);
+    })
+}
+
+async function logout() {
+    try {
+        await fetch('/logout', {method: 'POST'});
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function preventReloadingOnSubmit() {
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+        });
+    });
+}
+
+async function showLoginForm() {
+    document.getElementById("login").innerHTML = `
+    <div id="login">
+        <form class="phone-form">
+            <label for="phone">Номер телефона
+                <input type="tel" id="phone" required>
+            </label>
+            <button type="submit">
+                Запросить код подтверждения
+            </button>
+        </form>
+
+        <form class="phone-confirmation-form">
+
+            <label for="phone-confirmation-code">Код подтверждения
+                <input type="text" id="phone-confirmation-code" placeholder="Код подтверждения">
+            </label>
+            <button type="submit">Подтвердить номер телефона</button>
+        </form>
+    `;
+
+    let phoneForm = document.getElementsByClassName('phone-form')[0]
+    phoneForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await requestSMScode(document.getElementById('phone').value);
+    })
+
+    let confirmationCodeForm = document.getElementsByClassName('phone-confirmation-form')[0]
+    confirmationCodeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        confirmCode(document.getElementById('phone').value, document.getElementById('phone-confirmation-code').value).then(() => {
+            displayIfLoggedIn();
+        });
     })
 }

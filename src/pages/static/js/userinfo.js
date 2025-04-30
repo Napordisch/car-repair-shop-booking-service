@@ -1,7 +1,7 @@
 import {Customer} from './customer.js';
 export async function getUserInfo(){
     let customer;
-    fetch('/user-information',{ method: 'GET' ,
+    await fetch('/user-information',{ method: 'GET' ,
         headers: {
             'Content-Type': 'application/json'
         }

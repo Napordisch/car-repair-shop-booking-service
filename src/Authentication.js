@@ -28,3 +28,12 @@ export function verifyAuthToken(req, res, next) {
         next();
     });
 }
+
+export function removeAuthToken(res) {
+    res.clearCookie('authToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/', // Must match the path used when setting the cookie
+    });
+}

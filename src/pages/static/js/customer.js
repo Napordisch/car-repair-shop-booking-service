@@ -4,7 +4,7 @@ export class Customer {
     phoneNumber;
     firstName;
     lastName;
-    Customer(id, phoneNumber, firstName, lastName, email) {
+    constructor (id, phoneNumber, firstName, lastName, email) {
         if (id != null) {
             this.id = id;
         }
@@ -22,10 +22,10 @@ export class Customer {
         }
     }
     static fromJSON(customerJSON) {
-       let customerInstance;
-        if (typeof customerInstance === "string") {
+        let customerInstance;
+        if (typeof customerJSON == "string") {
             customerInstance = JSON.parse(customerJSON);
-        } else if (typeof customerInstance === "object") {
+        } else if (typeof customerJSON == "object") {
             customerInstance = customerJSON;
         }
         return new Customer(customerInstance.id,

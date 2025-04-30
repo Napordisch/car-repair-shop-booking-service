@@ -5,22 +5,14 @@ import cookieParser from "cookie-parser"
 import * as path from 'path';
 import {Customer} from './pages/static/js/customer.js'
 
-import {
-    getAddress,
-} from "./utilities.js";
+import {getAddress} from "./utilities.js";
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
 import {Address, addressType} from "./Address.js";
-import {setAuthToken, verifyAuthToken} from "./Authentication.js";
+import {removeAuthToken, setAuthToken, verifyAuthToken} from "./Authentication.js";
 
 const port = 3000;
 const app = express();
-
-const AddressType = Object.freeze({
-    EMAIL: 1,
-    PHONE: 2,
-});
-
 
 app.use(express.json());
 app.use(cookieParser())
@@ -111,10 +103,18 @@ app.post('/confirm-code', async (req, res) => {
 
 app.get('/user-information', verifyAuthToken, async (req, res) => {
     const users = await database.query(`SELECT *FROM Customers WHERE id = ?;`, [req.userId]);
+
     if (users.length > 1) {
         res.status(400);
         throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
     }
+
+    if (users.length < 1) {
+        res.status(400);
+        res.send();
+        throw new NoUsersFoundError("no user with such id is found in database");
+    }
+
     const theCustomer = Customer.fromJSON(users[0]);
     res.status(200);
     res.json(theCustomer);
@@ -129,4 +129,14 @@ app.get('/working-time', async (req, res) => {
 });
 
 app.post('/create-order', verifyAuthToken, async (req, res) => {
+})
+
+app.post('/logout', async (req, res) => {
+    try {
+        removeAuthToken(res);
+        res.status(200).send('logged out');
+    } catch (e) {
+        console.error(e);
+        res.status(400).send('error logging out');
+    }
 })

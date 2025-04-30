@@ -24,5 +24,11 @@ export class AbstractClassInstantiationError extends Error {
         super(message);
         this.name = "AbstractClassInstantiationError";
     }
+}
 
+export class NoUsersFoundError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "NoUsersFoundError";
+    }
 }
