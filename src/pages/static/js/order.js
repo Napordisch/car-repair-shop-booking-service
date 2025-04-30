@@ -4,9 +4,6 @@ const currentMonth = new Date().getMonth(); // 0-indexed
 
 const currentYear = new Date().getFullYear();
 const currentDate = new Date().getDate(); // 1 indexed, like real dates
-console.log(currentMonth);
-console.log(currentYear);
-console.log(currentDate);
 let totalServicesPrice = 0;
 let openingTime;
 let closingTime;
@@ -157,8 +154,6 @@ function updateMonthList() {
 
 function timeSelectorOptionsHTML() {
     let timeList = [];
-    console.log(openingTime);
-    console.log(closingTime);
     for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
         timeList.push(`<option value="${hour}:00">${hour}:00</option>`);
         if (hour !== closingTime.hours) {
@@ -202,13 +197,11 @@ function createOrder() {
         month = "0" + month;
     }
     const initialVisit = currentYear.toString() + "-" + month.toString() + "-" + date.toString() + "T" + time.toString() + ":00";
-    console.log(initialVisit);
 
     const requestBody = JSON.stringify({
         initialVisit: initialVisit,
         serviceIDs: selectedServices
     });
-    console.log(requestBody);
 
     fetch('/create-order', {
         method: 'POST',
@@ -225,4 +218,3 @@ function createOrder() {
         console.error(error);
     })
 }
-console.log(new Date().toISOString());

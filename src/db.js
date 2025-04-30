@@ -17,9 +17,7 @@ export class Database {
     }
 
     async initialize() {
-        if (fs.existsSync(path.dirname(this.dbPath))) {
-            console.log('Database file already exists');
-        } else {
+        if (!fs.existsSync(path.dirname(this.dbPath))) {
             fs.mkdirSync(path.dirname(this.dbPath));
         }
 
@@ -33,7 +31,6 @@ export class Database {
                         console.error('Error initializing database:', err);
                         reject(err);
                     } else {
-                        console.log('Database initialized successfully');
                         resolve();
                     }
                 });
@@ -69,8 +66,6 @@ export class Database {
             this.db.close((err) => {
                 if (err) {
                     console.error('Error closing database:', err);
-                } else {
-                    console.log('Database connection closed');
                 }
             });
             this.db = null;

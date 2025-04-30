@@ -62,7 +62,6 @@ app.post('/get-confirmation-code', async (req, res) => {
 });
 
 async function registerUser(address) {
-    console.log(`registering a user with ${address.type} number ${address.value}`)
     await database.run(`INSERT INTO Customers (${address.type}) VALUES (?)`, [address.value]);
 }
 
@@ -76,12 +75,11 @@ app.post('/confirm-code', async (req, res) => {
         res.send("code is undefined");
     }
 
-    console.log(address);
     const addressCodePairs = await database.query(`SELECT * FROM ConfirmationCodes WHERE address = ?;`, [address.value]);
     if (addressCodePairs.length === 0) {
         res.status(404);
         res.send("noCodesForThisAddress");
-        console.log("noCodesForThisAddress");
+        console.error("noCodesForThisAddress");
         return;
     }
 
@@ -102,7 +100,6 @@ app.post('/confirm-code', async (req, res) => {
 
             res.status(200);
 
-            console.log("confirmed");
             res.send("confirmed");
 
             return;
@@ -118,7 +115,6 @@ app.get('/user-information', verifyAuthToken, async (req, res) => {
         res.status(400);
         throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
     }
-    console.log(users[0]);
     res.status(200);
     res.json(users[0]);
 });

@@ -3,7 +3,6 @@ import pkg from "cookie-parser"
 const {cookieParser} = pkg;
 
 export function setAuthToken(res, userId) {
-    console.log(process.env.JWT_SECRET);
     const token = jwt.sign({userId}, process.env.JWT_SECRET);
 
     res.cookie('authToken', token, {

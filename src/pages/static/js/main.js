@@ -59,7 +59,6 @@ let selectedServices = [];
 
 document.addEventListener('change', function (e) {
     selectedServices = [];
-    console.log(e);
     if (e.target.matches('.service-chosen')) {
         let total = 0;
         document.querySelectorAll('.service-chosen:checked').forEach(checkbox => {
