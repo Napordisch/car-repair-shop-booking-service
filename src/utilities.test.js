@@ -5,10 +5,20 @@ import {Address, Email, PhoneNumber} from "./Address.js";
 test('timeOfDay test', function () {
     const openingTime = new TimeOfDay(8, 0);
     const closingTime = new TimeOfDay(22, 0);
-    expect(openingTime.toString()).toBe("8:00");
-    expect(closingTime.toString()).toBe("22:00");
+
+    expect(openingTime.toStringWithoutSeconds()).toBe("08:00");
+    expect(openingTime.toString()).toBe("08:00:00");
+
+    expect(closingTime.toStringWithoutSeconds()).toBe("22:00");
+    expect(closingTime.toString()).toBe("22:00:00");
+
     const time3 = new TimeOfDay(8, 2);
-    expect(time3.toString()).toBe("8:02");
+    expect(time3.toStringWithoutSeconds()).toBe("08:02");
+    expect(time3.toString()).toBe("08:02:00");
+
+    const time4 = TimeOfDay.fromString("08:04");
+    expect(time4.toStringWithoutSeconds()).toBe("08:04");
+    expect(time4.toString()).toBe("08:04:00");
 })
 
 
