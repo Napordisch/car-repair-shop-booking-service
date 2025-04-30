@@ -1,3 +1,5 @@
+import {TimeOfDay} from "./TimeOfDay.js";
+
 const selectedServices = JSON.parse(sessionStorage.getItem('selectedServices'));
 const services = JSON.parse(sessionStorage.getItem('services'));
 const currentMonth = new Date().getMonth(); // 0-indexed
@@ -5,42 +7,21 @@ const currentMonth = new Date().getMonth(); // 0-indexed
 const currentYear = new Date().getFullYear();
 const currentDate = new Date().getDate(); // 1 indexed, like real dates
 let totalServicesPrice = 0;
-let openingTime;
-let closingTime;
 
 async function getWorkingTime() {
+    let openingTime;
+    let closingTime;
     await fetch('/working-time')
         .then(response => response.json())
         .then(response => {
-            openingTime = new TimeClass(response.openingTime.hours,
-                response.openingTime.minutes);
+            openingTime = response.openingTime;
 
-            closingTime = new TimeClass(response.closingTime.hours,
-                response.closingTime.minutes);
+            closingTime = response.closingTime;
         })
         .catch(error => {
             console.error(error);
         });
-}
-
-
-class DateClass{
-    year;
-    month;
-    day;
-    constructor(year, month, day){
-        this.year = year;
-        this.month = month;
-        this.day = day;
-    }
-}
-class TimeClass{
-    hours;
-    minutes;
-    constructor(hours, minutes){
-        this.hours = parseInt(hours);
-        this.minutes = parseInt(minutes);
-    }
+    return {openingTime: TimeOfDay.fromJSON(openingTime), closingTime: TimeOfDay.fromJSON(closingTime)};
 }
 
 function requestSMScode(phone) {
@@ -73,11 +54,9 @@ function confirmCode(address, code) {
     }).then(response => response.text())
         .then(data => {
             if (data === 'confirmed') {
-                sessionStorage.setItem('confirmed', 'true');
             }
         }).catch(error => {
         console.error('Error:', error);
-        sessionStorage.setItem('confirmed', 'false');
     });
 }
 
@@ -152,7 +131,8 @@ function updateMonthList() {
     document.getElementById('day-selector').innerHTML = daysOfMonthHTMLList(document.getElementById('month-selector').value);
 }
 
-function timeSelectorOptionsHTML() {
+function timeSelectorOptionsHTML(openingTime, closingTime) {
+    console.log(openingTime);
     let timeList = [];
     for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
         timeList.push(`<option value="${hour}:00">${hour}:00</option>`);
@@ -165,22 +145,22 @@ function timeSelectorOptionsHTML() {
 
 
 document.addEventListener('DOMContentLoaded', async function () {
+    console.log("contentLoaded");
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', e => {
             e.preventDefault();
         });
     });
 
-    addServices();
+    // addServices();
 
     let monthSelector = document.getElementById('month-selector')
     monthSelector.innerHTML = monthHTMLList();
     monthSelector.value = currentMonth;
     updateMonthList();
 
-    await getWorkingTime();
-    let timeSelector = document.getElementById('time-selector');
-    timeSelector.innerHTML = timeSelectorOptionsHTML();
+    let {openingTime, closingTime} = await getWorkingTime();
+    document.getElementById('time-selector').innerHTML = timeSelectorOptionsHTML(openingTime, closingTime);
 });
 
 function createOrder() {

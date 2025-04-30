@@ -1,6 +1,7 @@
-import {TimeOfDay} from "./utilities.js";
+import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
 import {AbstractClassInstantiationError, AddressError} from "./errors.js";
 import {Address, Email, PhoneNumber} from "./Address.js";
+import {Customer} from "./pages/static/js/Customer.js";
 
 test('timeOfDay test', function () {
     const openingTime = new TimeOfDay(8, 0);
@@ -19,6 +20,14 @@ test('timeOfDay test', function () {
     const time4 = TimeOfDay.fromString("08:04");
     expect(time4.toStringWithoutSeconds()).toBe("08:04");
     expect(time4.toString()).toBe("08:04:00");
+
+    const fromJSONStringTime = TimeOfDay.fromJSON(`{"hours": 4, "minutes": 2, "seconds": 5}`)
+    expect(fromJSONStringTime).toBeInstanceOf(TimeOfDay);
+    expect(fromJSONStringTime).toEqual({hours: 4, minutes: 2, seconds: 5});
+
+    const fromJSONTime = TimeOfDay.fromJSON({hours: 4, minutes: 2, seconds: 5})
+    expect(fromJSONTime).toBeInstanceOf(TimeOfDay);
+    expect(fromJSONTime).toEqual({hours: 4, minutes: 2, seconds: 5});
 })
 
 
@@ -37,4 +46,9 @@ describe('address tests', function () {
     test ('+89171238412 phone creation', function () {
         expect(function() {Address.create("+89171238412")}).toThrow(AddressError);
     })
+})
+
+
+test('customer class test', function () {
+
 })

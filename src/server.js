@@ -1,13 +1,12 @@
-import {__dirname} from './config.js';
+import {__dirname, openingTime, closingTime} from './config.js';
 import express from 'express';
 import database from './db.js';
 import cookieParser from "cookie-parser"
 import * as path from 'path';
+import {Customer} from './pages/static/js/customer.js'
 
 import {
     getAddress,
-    openingTime,
-    closingTime,
 } from "./utilities.js";
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
@@ -115,15 +114,16 @@ app.get('/user-information', verifyAuthToken, async (req, res) => {
         res.status(400);
         throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
     }
+    const theCustomer = Customer.fromJSON(users[0]);
     res.status(200);
-    res.json(users[0]);
+    res.json(theCustomer);
 });
 
 app.get('/working-time', async (req, res) => {
     res.status(200);
     res.json({
-        openingTime: openingTime.toString(),
-        closingTime: openingTime.toString(),
+        openingTime: openingTime,
+        closingTime: closingTime,
     });
 });
 
