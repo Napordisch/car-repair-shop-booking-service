@@ -17,7 +17,6 @@ export class Address {
         if (new.target === Address) {
             throw new AbstractClassInstantiationError("Cannot instantiate an abstract class.");
         }
-        this.value = address;
     }
 
     static create(address) {
@@ -38,6 +37,7 @@ export class Email extends Address {
 
     constructor(address) {
         super(address);
+        this.value = address;
     }
 }
 
@@ -47,5 +47,6 @@ export class PhoneNumber extends Address {
 
     constructor(address) {
         super(address);
+        this.value = address;
     }
 }

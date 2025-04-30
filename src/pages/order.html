@@ -26,7 +26,7 @@
 </table>
 
 <div id="login">
-    <form class="phone-form" onsubmit="requestSMScode(document.getElementById('phone').value);">
+    <form class="phone-form">
         <label for="phone">Номер телефона
             <input type="tel" id="phone" required>
         </label>
@@ -35,9 +35,7 @@
         </button>
     </form>
 
-    <form class="phone-confirmation-form" onsubmit="
-                confirmCode(sessionStorage.getItem('phone'),
-                document.getElementById('phone-confirmation-code').value);">
+    <form class="phone-confirmation-form">
 
         <label for="phone-confirmation-code">Код подтверждения
             <input type="text" id="phone-confirmation-code" placeholder="Код подтверждения">

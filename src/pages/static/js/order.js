@@ -1,4 +1,5 @@
 import {TimeOfDay} from "./TimeOfDay.js";
+import {getUserInfo} from "./userinfo.js";
 
 const selectedServices = JSON.parse(sessionStorage.getItem('selectedServices'));
 const services = JSON.parse(sessionStorage.getItem('services'));
@@ -151,6 +152,18 @@ document.addEventListener('DOMContentLoaded', async function () {
             e.preventDefault();
         });
     });
+
+    let phoneForm = document.getElementsByClassName('phone-form')[0]
+    console.log(phoneForm);
+    phoneForm.addEventListener('submit', () => {
+        requestSMScode(document.getElementById('phone').value);
+    })
+
+    let confirmationCodeForm = document.getElementsByClassName('phone-confirmation-form')[0]
+    console.log(confirmationCodeForm);
+    confirmationCodeForm.addEventListener('submit', () => {
+        confirmCode(document.getElementById('phone').value, document.getElementById('phone-confirmation-code').value);
+    })
 
     // addServices();
 

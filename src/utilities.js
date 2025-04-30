@@ -17,7 +17,6 @@ export function getAddress(req, res) {
             res.send(error.message);
             return null;
         }
-        throw error;
     }
 }
 

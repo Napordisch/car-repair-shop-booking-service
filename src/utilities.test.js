@@ -42,6 +42,7 @@ describe('address tests', function () {
 
     test ('phone creation test', function () {
         expect(Address.create("+79171238412")).toBeInstanceOf(PhoneNumber);
+        expect(Address.create("+79171238412")).toEqual({value: "+79171238412", type: 'phoneNumber'});
     })
     test ('+89171238412 phone creation', function () {
         expect(function() {Address.create("+89171238412")}).toThrow(AddressError);

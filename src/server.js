@@ -89,10 +89,11 @@ app.post('/confirm-code', async (req, res) => {
                 console.log(`deleted all codes for the user with ${address.type} ${address.value}`);
             }
 
-            const customers = await database.query(`SELECT * FROM Customers WHERE (${address.type}) = ?;`, [address.value]);
+            let customers = await database.query(`SELECT * FROM Customers WHERE (${address.type}) = ?;`, [address.value]);
             if (customers.length === 0) {
                 await registerUser(address);
             }
+            customers = await database.query(`SELECT * FROM Customers WHERE (${address.type}) = ?;`, [address.value]);
 
             const id = customers[0].id;
             setAuthToken(res, id);
