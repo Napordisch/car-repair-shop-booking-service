@@ -2,7 +2,8 @@ import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
 import {AbstractClassInstantiationError, AddressError} from "./errors.js";
 import {Address, Email, PhoneNumber} from "./Address.js";
 import {Customer} from "./pages/static/js/Customer.js";
-import {hoursFromMinutes} from "./utilities.js";
+import {hoursFromMinutes} from "./pages/static/js/TimeUtilities.js";
+import {questionMarkPlaceholderForArray} from "./utilities.js";
 
 test('timeOfDay test', function () {
     const openingTime = new TimeOfDay(8, 0);
@@ -52,4 +53,9 @@ describe('address tests', function () {
 
 test('minutes to hours test', function () {
    expect(hoursFromMinutes(300)).toBe(5);
+})
+
+
+test('question mark placeholder test', function () {
+    expect(questionMarkPlaceholderForArray([1,2,3])).toBe("?,?,?");
 })

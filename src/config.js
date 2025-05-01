@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import * as path from 'path';
 import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
-const __dirname = import.meta.dirname;
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // set in UTC

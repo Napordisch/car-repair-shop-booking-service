@@ -3,10 +3,10 @@ import sqlite3Pkg from "sqlite3";
 import * as path from 'path';
 import * as fs from 'fs';
 import * as validator from "validator";
+import {__dirname} from './config.js'
 
 const sqlite3 = sqlite3Pkg.verbose();
 
-const __dirname = import.meta.dirname;
 
 export class Database {
     constructor() {

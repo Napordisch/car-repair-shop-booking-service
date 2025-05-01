@@ -86,7 +86,7 @@ async function login(address, code) {
     }
 }
 
-async function updateServices() {
+async function updateSelectedServicesList() {
     totalServicesPrice = 0;
     let list = document.getElementById("services-list");
     for (const serviceid of await selectedServices()) {
@@ -126,9 +126,9 @@ async function monthHTMLList(disabledMonths = []) {
 async function daysOfMonthListHTML(month, disabledDays = []) {
     let rows = [];
     let amountOfDays = amountOfDaysInMonth(month,currentYear)
-    let startingDate = parseInt(month) === parseInt(currentMonth()) ? currentDate - 1 : 0;
+    let startingDate = parseInt(month) === parseInt(currentMonth()) ? currentDate : 1;
     for (let i = startingDate; i < amountOfDays; i++) {
-        rows.push(`<option value="${i}">${i+1}</option>`)
+        rows.push(`<option value="${i}">${i}</option>`)
     }
     return rows.join(`\n`);
 }
@@ -233,6 +233,7 @@ async function buildDatePicker(disabledDateTimes = []) {
     await buildMonthPicker();
     await buildDayPicker();
     await buildTimePicker();
+    initialVisitDate();
 }
 
 function preventReloadingOnSubmit() {
@@ -243,7 +244,33 @@ function preventReloadingOnSubmit() {
     });
 }
 
+async function createOrder(selectedServices, date) {
+    fetch('/create-order', {
+            method: 'POST',
+            body: JSON.stringify({
+                selectedServices: selectedServices,
+                initialVisitDate: date
+            }),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        }
+    ).catch(err=>{console.error(err)});
+}
+
+async function initialVisitDate() {
+    const day = document.getElementById('day-selector').value;
+    const month = document.getElementById('month-selector').value;
+    const time = TimeOfDay.fromString(document.getElementById('time-selector').value);
+    let date = new Date(Date.UTC(currentYear, month, day, time.hours, time.minutes,time.seconds));
+    return date;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-    displayUserInfoIfLoggedIn();
-    buildDatePicker();
+    displayUserInfoIfLoggedIn().catch((error) => {console.error(error)});
+    buildDatePicker().catch((error) => {console.error(error)});
+    updateSelectedServicesList().catch((error) => {console.error(error)});
+    document.getElementById('order-button').addEventListener('click', async() => {
+        await createOrder(sessionStorage.getItem("selectedServices"), await initialVisitDate());
+    })
 });

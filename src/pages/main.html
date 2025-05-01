@@ -11,7 +11,8 @@
     <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <script src="static/js/main.js"></script>
+
+    <script type="module" src="static/js/main.js"></script>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
@@ -31,7 +32,7 @@
     </div>
     <div class="button-with-price-container">
         <div class="buy-button-with-price">
-            <button onclick="bookServices()">Забронировать</button>
+            <button id="book-service-button">Забронировать</button>
             <p id="total-price">0 ₽</p>
         </div>
     </div>

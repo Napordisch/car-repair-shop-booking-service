@@ -1,10 +1,13 @@
+import express from 'express'
 import database from './db.js';
 import cookieParser from "cookie-parser"
 import * as path from 'path';
 import {Customer} from './pages/static/js/customer.js'
 
-import {getAddress} from "./utilities.js";
+import {getAddress, questionMarkPlaceholderForArray} from "./utilities.js";
 import {timeZoneOffsetInMinutes} from './utilities.js';
+import * as config from './config.js'
+import {deadline} from './utilities.js';
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
 import {Address, addressType} from "./Address.js";
@@ -16,10 +19,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser())
 
-app.use('/static', express.static(path.join(__dirname, 'pages', 'static')));
+app.use('/static', express.static(path.join(config.__dirname, 'pages', 'static')));
 
 app.get('/', (req, res) => {
-    res.sendFile('main.html', { root: path.join(__dirname, "pages") });
+    res.sendFile('main.html', { root: path.join(config.__dirname, "pages") });
 });
 
 app.listen(port, () => {
@@ -38,7 +41,7 @@ app.get('/services', async (req, res) => {
 });
 
 app.get('/order', async (req, res) => {
-    res.sendFile('order.html', { root: path.join(__dirname, "pages") });
+    res.sendFile('order.html', { root: path.join(config.__dirname, "pages") });
 });
 
 // TODO add email option and send code there
@@ -122,12 +125,28 @@ app.get('/user-information', verifyAuthToken, async (req, res) => {
 app.get('/working-time', async (req, res) => {
     res.status(200);
     res.json({
-        openingTime: openingTime,
-        closingTime: closingTime,
+        openingTime: config.openingTime,
+        closingTime: config.closingTime,
     });
 });
 
 app.post('/create-order', verifyAuthToken, async (req, res) => {
+    // req.body.selectedServices;
+    try {
+        const selectedServicesIds = JSON.parse(req.body.selectedServices);
+        const initialVisitDate = new Date(req.body.initialVisitDate);
+        if (req.body.selectedServices == null) {
+            res.status(400);
+            res.send("noServicesProvided");
+        }
+        const selectedServices = await database.query(`SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, selectedServicesIds);
+        const d = deadline(initialVisitDate, selectedServices);
+        await database.run(`INSERT INTO Orders (deadline, initialVisit, customerID) VALUES (?, ?, ?)`, [d.toISOString(), initialVisitDate.toISOString(), req.userId]);
+        res.status(200).send();
+    } catch (e) {
+        console.error(e);
+        res.status(400).send();
+    }
 })
 
 app.post('/logout', async (req, res) => {
