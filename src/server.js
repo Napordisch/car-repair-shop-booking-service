@@ -104,22 +104,27 @@ app.post('/confirm-code', async (req, res) => {
 });
 
 app.get('/user-information', verifyAuthToken, async (req, res) => {
-    const users = await database.query(`SELECT *FROM Customers WHERE id = ?;`, [req.userId]);
+    try {
+        const users = await database.query(`SELECT *
+                                            FROM Customers
+                                            WHERE id = ?;`, [req.userId]);
 
-    if (users.length > 1) {
-        res.status(400);
-        throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
-    }
+        if (users.length > 1) {
+            throw new impossibleDataBaseConditionError("more than 1 users with the same id found");
+        }
 
-    if (users.length < 1) {
+        if (users.length < 1) {
+            throw new NoUsersFoundError("no user with such id is found in database");
+        }
+
+        const theCustomer = Customer.fromJSON(users[0]);
+        res.status(200);
+        res.json(theCustomer);
+    } catch (error) {
+        console.error(error);
         res.status(400);
         res.send();
-        throw new NoUsersFoundError("no user with such id is found in database");
     }
-
-    const theCustomer = Customer.fromJSON(users[0]);
-    res.status(200);
-    res.json(theCustomer);
 });
 
 app.get('/working-time', async (req, res) => {
@@ -163,3 +168,17 @@ app.get('/time-zone-offset-in-minutes', async (req, res) => {
     res.status(200);
     res.send(JSON.stringify(timeZoneOffsetInMinutes()));
 })
+
+app.post('/deadline', async (req,res) => {
+    try {
+        let selectedServicesIds = JSON.parse(req.body.selectedServices);
+        res.status(200);
+        const selectedServices = await database.query(`SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, selectedServicesIds);
+        res.json({deadline: deadline(new Date(req.body.initialVisitDate), selectedServices)});
+    }catch (error) {
+        console.error(error);
+        res.status(404);
+        res.send();
+    }
+})
+// TODO: return forbidden times

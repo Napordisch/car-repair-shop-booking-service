@@ -16,7 +16,6 @@ export function msFromHours(hours, minutes, seconds) {
     if (seconds) {
         ms += seconds * 1000;
     }
-    console.log(ms);
     return ms;
 }
 export function hoursFromMs(ms) {
@@ -52,13 +51,15 @@ export function timeZoneOffsetInMinutes() {
 
 export function servicesDuration(services){
     let totalDuration = 0;
-    for (let service of services) {
+    const normalizedServices = Array.isArray(services) ? services : [services];
+    for (let service of normalizedServices) {
         totalDuration += service.duration;
     }
     return totalDuration;
 }
 
 export function deadline(initialVisit, services) {
+    console.log(initialVisit, services);
     const initialVisitDate = initialVisit instanceof Date ? initialVisit : new Date(initialVisit);
     let totalDuration = servicesDuration(services);
     console.log(totalDuration);
@@ -74,17 +75,16 @@ export function deadline(initialVisit, services) {
             closingTime.seconds));
 
     while (deadline > closingTimeThisDay) {
-        console.log(notWorkingTime());
         deadline.setTime(deadline.getTime() + notWorkingTime()) ;
         closingTimeThisDay.setUTCDate(closingTimeThisDay.getUTCDate() + 1);
     }
-    console.log(typeof deadline);
     console.log(deadline);
     return deadline;
 }
 
 export function questionMarkPlaceholderForArray(array) {
-    return array.map(() => '?').join(',');
+    const normalized = Array.isArray(array) ? array : [array];
+    return normalized.map(() => '?').join(',');
 }
 
 export async function amountOfParkingSpaces() {
@@ -100,14 +100,12 @@ export async function getAllOrders() {
     const orders = await getAllOrders();
     const events = [];
 
-    console.log(orders);
     orders.forEach((o) => {
         events.push({time: new Date(o.initialVisit), type: +1, spot: o.parkingSpace});
         events.push({time: new Date(o.deadline), type: -1, spot: o.parkingSpace});
     });
 
     events.sort((a, b) => a.time - b.time || a.type - b.type);
-    console.log(events);
     const occupied = new Set();
     let currentIntervalStart = null;
     const result = [];
@@ -125,14 +123,9 @@ export async function getAllOrders() {
         } else {
             if (currentIntervalStart !== null) {
                 result.push( {start: currentIntervalStart, end: ev.time});
-                console.log(result);
                 currentIntervalStart = null;
             }
         }
-        console.log(occupied);
     });
     return result;
 }
-
-console.log(await amountOfParkingSpaces());
-console.log(await occupiedIntervals());

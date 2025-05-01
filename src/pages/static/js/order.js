@@ -266,9 +266,48 @@ async function initialVisitDate() {
     return date;
 }
 
+async function allTimes() {
+    const timeSelector = document.getElementById('time-selector');
+    const timeSelectorValues = Array.from(timeSelector.options).map(option => option.value);
+    return timeSelectorValues;
+}
+
+async function datesOfCurrentDay() {
+    const day = document.getElementById('day-selector').value;
+    const month = document.getElementById('month-selector').value;
+    const times = await allTimes();
+    const dates = times.map(time => {
+        time = TimeOfDay.fromString(time);
+        let date = new Date(Date.UTC(currentYear, month, day, time.hours, time.minutes,time.seconds));
+        return date;
+    })
+    return dates;
+}
+
+async function deadlinesForTimes(times) {
+    (await datesOfCurrentDay()).forEach(async date => {
+        fetch('/deadline', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                initialVisitDate: date,
+                selectedServices: await selectedServices()
+            })
+        }).then(res => res.json()).then(res => {console.log(res)});
+    })
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     displayUserInfoIfLoggedIn().catch((error) => {console.error(error)});
-    buildDatePicker().catch((error) => {console.error(error)});
+    buildDatePicker()
+        .then(async function () {
+        console.log(await allTimes());
+        console.log(await(datesOfCurrentDay()));
+        console.log(await deadlinesForTimes());
+    })
+        .catch((error) => {console.error(error)});
     updateSelectedServicesList().catch((error) => {console.error(error)});
     document.getElementById('order-button').addEventListener('click', async() => {
         await createOrder(sessionStorage.getItem("selectedServices"), await initialVisitDate());
