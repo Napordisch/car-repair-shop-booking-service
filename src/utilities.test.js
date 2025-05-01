@@ -2,6 +2,7 @@ import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
 import {AbstractClassInstantiationError, AddressError} from "./errors.js";
 import {Address, Email, PhoneNumber} from "./Address.js";
 import {Customer} from "./pages/static/js/Customer.js";
+import {hoursFromMinutes} from "./utilities.js";
 
 test('timeOfDay test', function () {
     const openingTime = new TimeOfDay(8, 0);
@@ -49,7 +50,6 @@ describe('address tests', function () {
     })
 })
 
-
-test('customer class test', function () {
-
+test('minutes to hours test', function () {
+   expect(hoursFromMinutes(300)).toBe(5);
 })

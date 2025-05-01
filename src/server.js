@@ -1,13 +1,12 @@
-import {__dirname, openingTime, closingTime} from './config.js';
-import express from 'express';
 import database from './db.js';
 import cookieParser from "cookie-parser"
 import * as path from 'path';
 import {Customer} from './pages/static/js/customer.js'
 
 import {getAddress} from "./utilities.js";
+import {timeZoneOffsetInMinutes} from './utilities.js';
 
-import {AddressError, MissingDataError, impossibleDataBaseConditionError} from "./errors.js";
+import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
 import {Address, addressType} from "./Address.js";
 import {removeAuthToken, setAuthToken, verifyAuthToken} from "./Authentication.js";
 
@@ -139,4 +138,9 @@ app.post('/logout', async (req, res) => {
         console.error(e);
         res.status(400).send('error logging out');
     }
+})
+
+app.get('/time-zone-offset-in-minutes', async (req, res) => {
+    res.status(200);
+    res.send(JSON.stringify(timeZoneOffsetInMinutes()));
 })

@@ -3,6 +3,7 @@ import pkg from "cookie-parser"
 import {AddressError} from "./errors.js";
 import {Address} from "./Address.js";
 import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
+import {hoursFromMinutes} from "./pages/static/js/TimeUtilities.js";
 
 const {cookieParser} = pkg;
 
@@ -20,3 +21,7 @@ export function getAddress(req, res) {
     }
 }
 
+export function timeZoneOffsetInMinutes() {
+    const offset = (new Date).getTimezoneOffset();
+    return -offset;
+}

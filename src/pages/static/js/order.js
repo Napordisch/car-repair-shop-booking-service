@@ -1,9 +1,16 @@
 import {TimeOfDay} from "./TimeOfDay.js";
 import {getUserInfo} from "./userinfo.js";
+import {hoursFromMinutes} from "./TimeUtilities.js";
 
-const selectedServices = JSON.parse(sessionStorage.getItem('selectedServices'));
-const services = JSON.parse(sessionStorage.getItem('services'));
-const currentMonth = new Date().getMonth(); // 0-indexed
+async function selectedServices() {
+    return JSON.parse(sessionStorage.getItem('selectedServices'));
+}
+
+async function services() {
+    return JSON.parse(sessionStorage.getItem('services'));
+}
+
+const currentMonth = () => new Date().getMonth(); // 0-indexed
 
 const months = ["Январь",
     "Февраль",
@@ -24,6 +31,10 @@ const currentDate = new Date().getDate(); // 1 indexed, like real dates
 let totalServicesPrice = 0;
 
 
+async function timeZoneOffsetInHours() {
+    return hoursFromMinutes(await fetch('/time-zone-offset-in-minutes').then((response) => response.json()));
+}
+
 async function workingTime() {
     let openingTime;
     let closingTime;
@@ -31,7 +42,6 @@ async function workingTime() {
         .then(response => response.json())
         .then(response => {
             openingTime = response.openingTime;
-
             closingTime = response.closingTime;
         })
         .catch(error => {
@@ -52,7 +62,7 @@ async function requestConfirmationCode(address) {
     });
 }
 
-async function confirmCode(address, code) {
+async function login(address, code) {
     try {
         await fetch(`/confirm-code`, {
             method: 'POST',
@@ -70,6 +80,7 @@ async function confirmCode(address, code) {
             }).catch(error => {
             console.error('Error:', error);
         });
+        displayUserInfoIfLoggedIn();
     } catch (error) {
         console.error('Error:', error);
     }
@@ -78,8 +89,8 @@ async function confirmCode(address, code) {
 async function updateServices() {
     totalServicesPrice = 0;
     let list = document.getElementById("services-list");
-    for (const serviceid of selectedServices) {
-        const service = services[serviceid];
+    for (const serviceid of await selectedServices()) {
+        const service = (await services())[serviceid];
         totalServicesPrice += parseInt(service.price);
         list.insertAdjacentHTML('beforeend', `
             <tr id='service-${service.id}'>
@@ -104,50 +115,43 @@ function amountOfDaysInMonth(month, year) {
     return daysPerMonth[month];
 }
 
-async function monthHTMLList() {
+async function monthHTMLList(disabledMonths = []) {
     let rows = [];
-    for (let i = currentMonth; i <= 11; i++) {
+    for (let i = currentMonth(); i <= 11; i++) {
         rows.push(`<option value="${i}">${months[i]}</option>`);
     }
     return rows.join(`\n`);
 }
 
-// month is 0-indexed
-async function daysOfMonthHTMLList(month) {
+async function daysOfMonthListHTML(month, disabledDays = []) {
     let rows = [];
     let amountOfDays = amountOfDaysInMonth(month,currentYear)
-    let startingDate = parseInt(month) === parseInt(currentMonth) ? currentDate - 1 : 0;
+    let startingDate = parseInt(month) === parseInt(currentMonth()) ? currentDate - 1 : 0;
     for (let i = startingDate; i < amountOfDays; i++) {
         rows.push(`<option value="${i}">${i+1}</option>`)
     }
     return rows.join(`\n`);
 }
 
-async function updateMonthList() {
-    document.getElementById('day-selector').innerHTML = daysOfMonthHTMLList(document.getElementById('month-selector').value);
-}
-
-async function timeSelectorOptionsHTML(openingTime, closingTime) {
+async function timeSelectorOptionsHTML(openingTime, closingTime, disabledTimes=[]) {
     let timeList = [];
+    const offset = await timeZoneOffsetInHours();
     for (let hour = openingTime.hours; hour <= closingTime.hours; hour++) {
-        timeList.push(`<option value="${hour}:00">${hour}:00</option>`);
+        timeList.push(`<option value="${hour}:00">${hour + offset}:00</option>`);
         if (hour !== closingTime.hours) {
-            timeList.push(`<option value="${hour}:30">${hour}:30</option>`);
+            timeList.push(`<option value="${hour}:30">${hour + offset}:30</option>`);
         }
     }
     return timeList.join(`\n`);
 }
 
-async function customerInfoElement(customer) {
+async function customerInfoElementHTML(customer) {
     let lines = []
     if (customer.firstName != null) {
         lines.push(`<p>Вы: ${customer.firstName} ${customer.lastName != null ? customer.lastName : ""}</p>`);
     }
     if (customer.phoneNumber != null) {
         lines.push(`<p>Ваш номер телефона: ${customer.phoneNumber}</p>`);
-    }
-    if (customer.email != null) {
-        lines.push(`<p>Ваша почта: ${customer.email}</p>`);
     }
     if (customer.email != null) {
         lines.push(`<p>Ваша почта: ${customer.email}</p>`);
@@ -162,9 +166,9 @@ async function customerInfoElement(customer) {
 }
 async function addPhoneConfirmationForm () {
     const phoneConfirmationForm = `
-        <input placeholder="Номер телефона" id="phone-number"></input>
+        <input placeholder="Номер телефона" id="phone-number">
         <button id="request-code-button">Запросить код</button>
-        <input type="text" id="confirmation-code" placeholder="Код"></input>
+        <input type="text" id="confirmation-code" placeholder="Код">
         
         <button id="confirm-code-button">Подтвердить код</button>
     `
@@ -176,12 +180,12 @@ async function addPhoneConfirmationForm () {
     });
 
     document.getElementById("confirm-code-button").addEventListener("click",() => {
-        confirmCode(document.getElementById('phone-number').value, document.getElementById('confirmation-code').value)
+        login(document.getElementById('phone-number').value, document.getElementById('confirmation-code').value)
     });
 }
 
 async function displayUserInfo() {
-    document.getElementById('login').innerHTML = await customerInfoElement(await getUserInfo());
+    document.getElementById('login').innerHTML = await customerInfoElementHTML(await getUserInfo());
     document.getElementById('logout-button').addEventListener('click', logout)
 }
 
@@ -191,18 +195,45 @@ async function displayUserInfoIfLoggedIn() {
     } catch (error) {
         console.error(error)
         await addPhoneConfirmationForm();
-    };
+    }
 }
 
 async function logout() {
     try {
         await fetch('/logout', {method: 'POST'});
+        displayUserInfoIfLoggedIn();
     } catch (error) {
         console.error(error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', displayUserInfoIfLoggedIn);
+async function buildDatePicker(disabledDateTimes = []) {
+    async function buildMonthPicker() {
+        const monthSelector = document.getElementById('month-selector');
+        monthSelector.innerHTML = await monthHTMLList();
+        monthSelector.addEventListener('change', () => {
+            buildDayPicker();
+        })
+    }
+
+    async function buildDayPicker(disabledDays = []) {
+        const daySelector = document.getElementById('day-selector')
+        daySelector.innerHTML = await daysOfMonthListHTML(document.getElementById('month-selector').value);
+        daySelector.addEventListener('change', () => {
+            buildTimePicker();
+        })
+    }
+
+    async function buildTimePicker(disabledTimes = []) {
+        let {openingTime, closingTime} = await workingTime();
+        const timeSelector = document.getElementById('time-selector');
+        timeSelector.innerHTML = await timeSelectorOptionsHTML(openingTime, closingTime);
+    }
+
+    await buildMonthPicker();
+    await buildDayPicker();
+    await buildTimePicker();
+}
 
 function preventReloadingOnSubmit() {
     document.querySelectorAll('form').forEach(form => {
@@ -211,3 +242,8 @@ function preventReloadingOnSubmit() {
         });
     });
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    displayUserInfoIfLoggedIn();
+    buildDatePicker();
+});
