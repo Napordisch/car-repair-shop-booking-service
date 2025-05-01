@@ -61,6 +61,16 @@ export class Database {
         });
     }
 
+    async singleQuery(sql,params = []) {
+        await this.initializationPromise;
+        return new Promise((resolve, reject) => {
+            this.db.get(sql, params, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+    }
+
     close() {
         if (this.db) {
             this.db.close((err) => {

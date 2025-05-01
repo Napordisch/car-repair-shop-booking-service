@@ -5,6 +5,7 @@ import {Address} from "./Address.js";
 import {TimeOfDay} from "./pages/static/js/TimeOfDay.js";
 import {hoursFromMinutes} from "./pages/static/js/TimeUtilities.js";
 import {openingTime, closingTime} from "./config.js";
+import database from './db.js';
 const {cookieParser} = pkg;
 
 export function msFromHours(hours, minutes, seconds) {
@@ -85,3 +86,53 @@ export function deadline(initialVisit, services) {
 export function questionMarkPlaceholderForArray(array) {
     return array.map(() => '?').join(',');
 }
+
+export async function amountOfParkingSpaces() {
+    const amountOfParkingSpaces = await database.singleQuery(`SELECT COUNT(*) AS count FROM ParkingSpaces`);
+    return amountOfParkingSpaces.count;
+}
+
+export async function getAllOrders() {
+    return await database.query(`SELECT * FROM Orders`);
+}
+ export async function occupiedIntervals() {
+    const parkingSpacesAmount = await amountOfParkingSpaces();
+    const orders = await getAllOrders();
+    const events = [];
+
+    console.log(orders);
+    orders.forEach((o) => {
+        events.push({time: new Date(o.initialVisit), type: +1, spot: o.parkingSpace});
+        events.push({time: new Date(o.deadline), type: -1, spot: o.parkingSpace});
+    });
+
+    events.sort((a, b) => a.time - b.time || a.type - b.type);
+    console.log(events);
+    const occupied = new Set();
+    let currentIntervalStart = null;
+    const result = [];
+
+    events.forEach(ev => {
+        if (ev.type === +1) {
+            occupied.add(ev.spot);
+        } else {
+            occupied.delete(ev.spot);
+        }
+        if (occupied.size === parkingSpacesAmount) {
+            if (currentIntervalStart === null) {
+                currentIntervalStart = ev.time;
+            }
+        } else {
+            if (currentIntervalStart !== null) {
+                result.push( {start: currentIntervalStart, end: ev.time});
+                console.log(result);
+                currentIntervalStart = null;
+            }
+        }
+        console.log(occupied);
+    });
+    return result;
+}
+
+console.log(await amountOfParkingSpaces());
+console.log(await occupiedIntervals());

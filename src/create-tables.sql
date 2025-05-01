@@ -1,4 +1,3 @@
--- Create Customers table if it doesn't exist
 CREATE TABLE IF NOT EXISTS Customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     firstName TEXT,
@@ -7,7 +6,6 @@ CREATE TABLE IF NOT EXISTS Customers (
     email TEXT
 );
 
--- Create Services table if it doesn't exist
 CREATE TABLE IF NOT EXISTS Services (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     price INTEGER NOT NULL,
@@ -17,16 +15,16 @@ CREATE TABLE IF NOT EXISTS Services (
     active BOOLEAN NOT NULL DEFAULT 1
 );
 
--- Create Orders table if it doesn't exist
 CREATE TABLE IF NOT EXISTS "Orders" (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    deadline DATE NOT NULL,
-    initialVisit DATE NOT NULL,
+    deadline TEXT NOT NULL,
+    initialVisit TEXT NOT NULL,
     customerID INTEGER NOT NULL,
-    FOREIGN KEY (customerID) REFERENCES Customers(id)
+    parkingSpace INTEGER NOT NULL,
+    FOREIGN KEY (customerID) REFERENCES Customers(id),
+    FOREIGN KEY (parkingSpace) REFERENCES ParkingSpaces(number)
 );
 
--- Create ParkingSpaces table if it doesn't exist
 CREATE TABLE IF NOT EXISTS ParkingSpaces (
     number INTEGER PRIMARY KEY
 );
