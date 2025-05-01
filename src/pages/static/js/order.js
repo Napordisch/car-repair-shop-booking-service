@@ -1,6 +1,7 @@
 import {TimeOfDay} from "./TimeOfDay.js";
 import {getUserInfo} from "./userinfo.js";
 import {hoursFromMinutes} from "./TimeUtilities.js";
+import { isTimeOptionValid } from './timeValidation.js';
 
 async function selectedServices() {
     return JSON.parse(sessionStorage.getItem('selectedServices'));
@@ -299,14 +300,29 @@ async function deadlinesForTimes(times) {
     })
 }
 
+async function disableInvalidTimes() {
+    const timeSelector = document.getElementById('time-selector');
+    const options = timeSelector.options;
+    const year = currentYear;
+    const month = document.getElementById('month-selector').value;
+    const day = document.getElementById('day-selector').value;
+    
+    for (let i = 0; i < options.length; i++) {
+        const time = options[i].value;
+        const isValid = await isTimeOptionValid(time, await selectedServices(), year, month, day);
+        options[i].disabled = !isValid;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     displayUserInfoIfLoggedIn().catch((error) => {console.error(error)});
     buildDatePicker()
         .then(async function () {
-        console.log(await allTimes());
-        console.log(await(datesOfCurrentDay()));
-        console.log(await deadlinesForTimes());
-    })
+            await disableInvalidTimes();
+            console.log(await allTimes());
+            console.log(await(datesOfCurrentDay()));
+            console.log(await deadlinesForTimes());
+        })
         .catch((error) => {console.error(error)});
     updateSelectedServicesList().catch((error) => {console.error(error)});
     document.getElementById('order-button').addEventListener('click', async() => {

@@ -8,6 +8,7 @@ import {getAddress, questionMarkPlaceholderForArray} from "./utilities.js";
 import {timeZoneOffsetInMinutes} from './utilities.js';
 import * as config from './config.js'
 import {deadline} from './utilities.js';
+import {occupiedIntervals} from './utilities.js';
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
 import {Address, addressType} from "./Address.js";
@@ -181,4 +182,17 @@ app.post('/deadline', async (req,res) => {
         res.send();
     }
 })
+
+app.get('/occupied-intervals', async (req, res) => {
+    try {
+        const intervals = await occupiedIntervals();
+        res.status(200);
+        res.json(intervals);
+    } catch (error) {
+        console.error(error);
+        res.status(500);
+        res.send('Error fetching occupied intervals');
+    }
+})
+
 // TODO: return forbidden times
