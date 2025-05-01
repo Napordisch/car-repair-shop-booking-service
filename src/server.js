@@ -8,7 +8,7 @@ import {getAddress, questionMarkPlaceholderForArray} from "./utilities.js";
 import {timeZoneOffsetInMinutes} from './utilities.js';
 import * as config from './config.js'
 import {deadline} from './utilities.js';
-import {occupiedIntervals} from './utilities.js';
+import {occupiedIntervals, findAvailableParkingSpace} from './utilities.js';
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
 import {Address, addressType} from "./Address.js";
@@ -137,17 +137,41 @@ app.get('/working-time', async (req, res) => {
 });
 
 app.post('/create-order', verifyAuthToken, async (req, res) => {
-    // req.body.selectedServices;
     try {
         const selectedServicesIds = JSON.parse(req.body.selectedServices);
         const initialVisitDate = new Date(req.body.initialVisitDate);
         if (req.body.selectedServices == null) {
             res.status(400);
             res.send("noServicesProvided");
+            return;
         }
         const selectedServices = await database.query(`SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, selectedServicesIds);
         const d = deadline(initialVisitDate, selectedServices);
-        await database.run(`INSERT INTO Orders (deadline, initialVisit, customerID) VALUES (?, ?, ?)`, [d.toISOString(), initialVisitDate.toISOString(), req.userId]);
+        
+        // Find an available parking space
+        const parkingSpace = await findAvailableParkingSpace(initialVisitDate, d);
+        if (parkingSpace === null) {
+            res.status(400);
+            res.send("noParkingSpaceAvailable");
+            return;
+        }
+        
+        // Insert the order and get its ID
+        const result = await database.run(
+            `INSERT INTO Orders (deadline, initialVisit, customerID, parkingSpace) VALUES (?, ?, ?, ?)`,
+            [d.toISOString(), initialVisitDate.toISOString(), req.userId, parkingSpace]
+        );
+        
+        const orderId = result.lastID;
+        
+        // Insert each selected service into OrderServices
+        for (const serviceId of selectedServicesIds) {
+            await database.run(
+                `INSERT INTO OrderServices (orderID, serviceID) VALUES (?, ?)`,
+                [orderId, serviceId]
+            );
+        }
+        
         res.status(200).send();
     } catch (e) {
         console.error(e);

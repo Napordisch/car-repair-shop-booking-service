@@ -129,3 +129,50 @@ export async function getAllOrders() {
     });
     return result;
 }
+
+export async function findAvailableParkingSpace(initialVisit, deadline) {
+    try {
+        // Get all parking spaces
+        const allSpaces = await database.query('SELECT number FROM ParkingSpaces');
+        
+        // Get all orders
+        const allOrders = await database.query(`
+            SELECT parkingSpace, initialVisit, deadline 
+            FROM Orders 
+            ORDER BY initialVisit ASC
+        `);
+        console.log(allSpaces);
+        
+        // Create a set of occupied spaces
+        const occupiedSpaces = new Set();
+        
+        // Check each order for overlap
+        for (const order of allOrders) {
+            const orderStart = new Date(order.initialVisit);
+            const orderEnd = new Date(order.deadline);
+            console.log(initialVisit, deadline, orderStart, orderEnd);
+            
+            // Check if the intervals overlap
+            if (
+                (initialVisit.getTime() <= orderEnd.getTime() && deadline.getTime() >= orderStart.getTime()) || // Our interval overlaps with the order
+                (orderStart.getTime() <= deadline.getTime() && orderEnd.getTime() >= initialVisit.getTime())    // Order overlaps with our interval
+            ) {
+                occupiedSpaces.add(order.parkingSpace);
+            }
+        }
+        console.log(occupiedSpaces);
+        
+        // Find the first available space
+        for (const space of allSpaces) {
+            if (!occupiedSpaces.has(space.number)) {
+                return space.number;
+            }
+        }
+        
+        // If no space is available, return null
+        return null;
+    } catch (error) {
+        console.error('Error finding available parking space:', error);
+        return null;
+    }
+}
