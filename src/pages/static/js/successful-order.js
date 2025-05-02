@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const result = await response.json();
                 if (result.success) {
-                    alert('Информация обновлена успешно');
+                    alert('Информация обновлена');
                     location.reload(); // Reload to hide the fields that were just filled
                 } else {
                     alert('Ошибка при обновлении информации: ' + result.error);
