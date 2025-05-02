@@ -167,7 +167,7 @@ async function customerInfoElementHTML(customer) {
 }
 async function addPhoneConfirmationForm () {
     const phoneConfirmationForm = `
-        <input placeholder="Номер телефона" id="phone-number">
+        <input placeholder="Номер телефона или почта" id="phone-number">
         <button id="request-code-button">Запросить код</button>
         <input type="text" id="confirmation-code" placeholder="Код">
         
@@ -212,16 +212,18 @@ async function buildDatePicker(disabledDateTimes = []) {
     async function buildMonthPicker() {
         const monthSelector = document.getElementById('month-selector');
         monthSelector.innerHTML = await monthHTMLList();
-        monthSelector.addEventListener('change', () => {
-            buildDayPicker();
+        monthSelector.addEventListener('change', async () => {
+            await buildDayPicker();
+            await disableInvalidTimes();
         })
     }
 
     async function buildDayPicker(disabledDays = []) {
         const daySelector = document.getElementById('day-selector')
         daySelector.innerHTML = await daysOfMonthListHTML(document.getElementById('month-selector').value);
-        daySelector.addEventListener('change', () => {
-            buildTimePicker();
+        daySelector.addEventListener('change', async () => {
+            await buildTimePicker();
+            await disableInvalidTimes();
         })
     }
 
@@ -229,6 +231,7 @@ async function buildDatePicker(disabledDateTimes = []) {
         let {openingTime, closingTime} = await workingTime();
         const timeSelector = document.getElementById('time-selector');
         timeSelector.innerHTML = await timeSelectorOptionsHTML(openingTime, closingTime);
+        await disableInvalidTimes();
     }
 
     await buildMonthPicker();
@@ -256,7 +259,15 @@ async function createOrder(selectedServices, date) {
                 'Content-type': 'application/json'
             }
         }
-    ).catch(err=>{console.error(err)});
+    ).then(response => {
+        if (response.ok) {
+            window.location.href = '/successful-order';
+        } else {
+            console.error('Failed to create order');
+        }
+    }).catch(err => {
+        console.error(err);
+    });
 }
 
 async function initialVisitDate() {
@@ -273,32 +284,7 @@ async function allTimes() {
     return timeSelectorValues;
 }
 
-async function datesOfCurrentDay() {
-    const day = document.getElementById('day-selector').value;
-    const month = document.getElementById('month-selector').value;
-    const times = await allTimes();
-    const dates = times.map(time => {
-        time = TimeOfDay.fromString(time);
-        let date = new Date(Date.UTC(currentYear, month, day, time.hours, time.minutes,time.seconds));
-        return date;
-    })
-    return dates;
-}
 
-async function deadlinesForTimes(times) {
-    (await datesOfCurrentDay()).forEach(async date => {
-        fetch('/deadline', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                initialVisitDate: date,
-                selectedServices: await selectedServices()
-            })
-        }).then(res => res.json()).then(res => {console.log(res)});
-    })
-}
 
 async function disableInvalidTimes() {
     const timeSelector = document.getElementById('time-selector');
@@ -319,9 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     buildDatePicker()
         .then(async function () {
             await disableInvalidTimes();
-            console.log(await allTimes());
-            console.log(await(datesOfCurrentDay()));
-            console.log(await deadlinesForTimes());
+            
         })
         .catch((error) => {console.error(error)});
     updateSelectedServicesList().catch((error) => {console.error(error)});

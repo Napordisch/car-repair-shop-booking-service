@@ -1,0 +1,43 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Время забронировано</title>
+    <link rel="stylesheet" href="/static/css/common-styles.css">
+
+    <!-- fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+
+<body>
+    <a href="/" class="back-button">На главную</a>
+    <h1 id="order-id"></h1>
+    <table id="services-list">
+        <thead>
+            <tr>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div id="name-fields" style="display: none;">
+        <p>Оставьте ваше имя, чтобы мы знали как к вам обращаться</p>
+        <input type="text" id="first-name" placeholder="Имя">
+        <input type="text" id="last-name" placeholder="Фамилия">
+    </div>
+
+    <div id="email-field" style="display: none;">
+        <p>Почта позволит вам заходить на страницу бронирования, как номер телефона</p>
+        <input type="text" id="email" placeholder="Email">
+    </div>
+
+    <div id="submit-button-container" style="margin-top: 1em; display: none;">
+        <button id="submit-button">Отправить</button>
+    </div>
+
+    <script src="static/js/successful-order.js"></script>
+</body>
+
+</html>
