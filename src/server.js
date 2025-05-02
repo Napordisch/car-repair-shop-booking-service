@@ -490,4 +490,16 @@ app.post('/admin/services', verifyAdmin, async (req, res) => {
     }
 });
 
+app.get('/parking-spaces', async (req, res) => {
+    try {
+        const result = await database.singleQuery('SELECT COUNT(*) as count FROM ParkingSpaces');
+        res.status(200);
+        res.send(JSON.stringify(result.count));
+    } catch (error) {
+        console.error('Error fetching parking spaces:', error);
+        res.status(500).send('Error fetching parking spaces');
+    }
+});
+
+
 // TODO: return forbidden times

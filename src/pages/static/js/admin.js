@@ -78,7 +78,7 @@ async function displayServices() {
                         <th>Название</th>
                         <th>Цена</th>
                         <th>Статус</th>
-                        <th>Действия</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -114,6 +114,11 @@ function utcToLocalDatetimeString(utcIsoString) {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+async function displayParkingSpaces() {
+    const response = await fetch('/parking-spaces');
+    const parkingSpaces = await response.json();
+    document.getElementById('parking-spaces-count').innerHTML = parkingSpaces;
+}
 // Display orders in the admin panel
 async function displayOrders() {
     try {
@@ -160,11 +165,74 @@ async function displayOrders() {
     }
 }
 
-// Initialize admin panel
+async function displayAmountOfParkingSpaces() {
+    const response = await fetch('/parking-spaces');
+    const parkingSpaces = await response.json();
+    document.getElementById('parking-spaces-count').innerHTML = parkingSpaces;
+}
+
+async function displayParkingSpacesStatus() {
+    try {
+        const orders = await fetchAllOrders();
+        const now = new Date();
+        
+        // Get all parking spaces
+        const parkingSpacesResponse = await fetch('/parking-spaces');
+        const totalSpaces = await parkingSpacesResponse.json();
+        
+        const table = document.getElementById('parking-spaces-state');
+        if (!table) return;
+        
+        // Clear existing rows except header
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+        
+        // Create a map of occupied parking spaces
+        const occupiedSpaces = new Map();
+        orders.forEach(order => {
+            const visitTime = new Date(order.initialVisit);
+            const deadline = new Date(order.deadline);
+            if (now >= visitTime && now <= deadline) {
+                occupiedSpaces.set(order.parkingSpace, order);
+            }
+        });
+        
+        // Add rows for each parking space
+        for (let i = 1; i <= totalSpaces; i++) {
+            const row = table.insertRow();
+            row.insertCell().textContent = i;
+            
+            const order = occupiedSpaces.get(i);
+            if (order) {
+                const customerName = `${order.firstName || ''} ${order.lastName || ''}`.trim() || 'Не указано';
+                const visitTime = new Date(order.initialVisit).toLocaleString('ru-RU');
+                const deadline = new Date(order.deadline).toLocaleString('ru-RU');
+                
+                row.insertCell().innerHTML = `
+                    <div>ID бронирования: ${order.id}</div>
+                    <div>Клиент: ${customerName}</div>
+                    <div>Время визита: ${visitTime}</div>
+                    <div>Ожидаемое завершение: ${deadline}</div>
+                `;
+            } else {
+                row.insertCell().textContent = 'Свободно';
+            }
+        }
+    } catch (error) {
+        console.error('Error displaying parking spaces status:', error);
+    }
+}
+
+// Update the initialization to include parking spaces status
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await displayServices();
         await displayOrders();
+        await displayParkingSpacesStatus();
+        await displayAmountOfParkingSpaces();
+        // Refresh status every minute
+        setInterval(displayParkingSpacesStatus, 60000);
     } catch (error) {
         console.error('Error initializing admin panel:', error);
     }
