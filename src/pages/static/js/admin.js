@@ -273,12 +273,13 @@ async function updateDeadline(orderId, deadline) {
             },
             body: JSON.stringify({ deadline: localDatetimeToUTC(deadline) })
         });
-
+        
         if (!response.ok) {
             throw new Error('Failed to update deadline');
         }
         
-        // Reload orders to show updated deadline
+        // Only update parking spaces status if the deadline update was successful
+        await displayParkingSpacesStatus();
     } catch (error) {
         console.error('Error updating deadline:', error);
         alert('Ошибка при обновлении дедлайна');
