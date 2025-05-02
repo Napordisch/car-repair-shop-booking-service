@@ -1,4 +1,5 @@
 import pkg from "cookie-parser"
+import nodemailer from 'nodemailer'
 
 import {AddressError} from "./errors.js";
 import {Address} from "./Address.js";
@@ -174,5 +175,31 @@ export async function findAvailableParkingSpace(initialVisit, deadline) {
     } catch (error) {
         console.error('Error finding available parking space:', error);
         return null;
+    }
+}
+
+export async function sendPlainEmail(to, text) {
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
+        }
+    });
+
+    try {
+        await transporter.sendMail({
+            from: `"Автосервис" <${process.env.SMTP_USER}>`,
+            to: to,
+            subject: 'Код подтверждения',
+            text: text,
+            replyTo: process.env.SMTP_USER
+        });
+        return true;
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return false;
     }
 }

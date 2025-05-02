@@ -4,14 +4,14 @@ import cookieParser from "cookie-parser"
 import * as path from 'path';
 import {Customer} from './pages/static/js/customer.js'
 
-import {getAddress, questionMarkPlaceholderForArray} from "./utilities.js";
+import {getAddress, questionMarkPlaceholderForArray, sendPlainEmail} from "./utilities.js";
 import {timeZoneOffsetInMinutes} from './utilities.js';
 import * as config from './config.js'
 import {deadline} from './utilities.js';
 import {occupiedIntervals, findAvailableParkingSpace} from './utilities.js';
 
 import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
-import {Address, addressType} from "./Address.js";
+import {Address, addressType, Email} from "./Address.js";
 import {removeAuthToken, setAuthToken, verifyAuthToken} from "./Authentication.js";
 import jwt from 'jsonwebtoken';
 
@@ -46,11 +46,15 @@ app.get('/order', async (req, res) => {
     res.sendFile('order.html', { root: path.join(config.__dirname, "pages") });
 });
 
+
 // TODO add email option and send code there
 app.post('/get-confirmation-code', async (req, res) => {
     const address = getAddress(req, res);
     const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(confirmationCode);
+    if (address instanceof Email) {
+        sendPlainEmail(address.value, confirmationCode.toString());
+    }
     await database.run(`INSERT OR IGNORE INTO ConfirmationCodes (address, code) VALUES (?, ?);`, [address.value, confirmationCode]);
     res.status(200);
     res.send("codeIsSent");
