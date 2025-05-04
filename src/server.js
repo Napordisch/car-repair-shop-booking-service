@@ -156,7 +156,7 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
         }
         const selectedServices = await database.query(`SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, selectedServicesIds);
         const d = deadline(initialVisitDate, selectedServices);
-        
+
         // Find an available parking space
         const parkingSpace = await findAvailableParkingSpace(initialVisitDate, d);
         if (parkingSpace === null) {
@@ -164,15 +164,15 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
             res.send("noParkingSpaceAvailable");
             return;
         }
-        
+
         // Insert the order and get its ID
         const result = await database.run(
             `INSERT INTO Orders (deadline, initialVisit, customerID, parkingSpace) VALUES (?, ?, ?, ?)`,
             [d.toISOString(), initialVisitDate.toISOString(), req.userId, parkingSpace]
         );
-        
+
         const orderId = result.lastID;
-        
+
         // Insert each selected service into OrderServices
         for (const serviceId of selectedServicesIds) {
             await database.run(
@@ -180,7 +180,7 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
                 [orderId, serviceId]
             );
         }
-        
+
         res.status(200).send();
     } catch (e) {
         console.error(e);
@@ -508,6 +508,3 @@ app.get('/parking-spaces', async (req, res) => {
         res.status(500).send('Error fetching parking spaces');
     }
 });
-
-
-// TODO: return forbidden times
