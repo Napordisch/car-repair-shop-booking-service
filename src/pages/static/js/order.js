@@ -167,7 +167,7 @@ async function customerInfoElementHTML(customer) {
 }
 async function addPhoneConfirmationForm () {
     const phoneConfirmationForm = `
-        <input placeholder="Номер телефона или почта" id="phone-number">
+        <input placeholder="Телефон или почта" id="phone-number">
         <button id="request-code-button">Запросить код</button>
         <input type="text" id="confirmation-code" placeholder="Код">
         
