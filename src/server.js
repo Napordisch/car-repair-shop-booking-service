@@ -2,21 +2,28 @@ import express from 'express'
 import database from './db.js';
 import cookieParser from "cookie-parser"
 import * as path from 'path';
-import {Customer} from './pages/static/js/customer.js'
+import { Customer } from './pages/static/js/customer.js'
+import { readFileSync } from 'fs';
 
-import {getAddress, questionMarkPlaceholderForArray, sendPlainEmail} from "./utilities.js";
-import {timeZoneOffsetInMinutes} from './utilities.js';
+import https from 'https';
+import { getAddress, questionMarkPlaceholderForArray, sendPlainEmail } from "./utilities.js";
+import { timeZoneOffsetInMinutes } from './utilities.js';
 import * as config from './config.js'
-import {deadline} from './utilities.js';
-import {occupiedIntervals, findAvailableParkingSpace} from './utilities.js';
+import { deadline } from './utilities.js';
+import { occupiedIntervals, findAvailableParkingSpace } from './utilities.js';
 
-import {AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError} from "./errors.js";
-import {Address, addressType, Email} from "./Address.js";
-import {removeAuthToken, setAuthToken, verifyAuthToken} from "./Authentication.js";
+import { AddressError, MissingDataError, impossibleDataBaseConditionError, NoUsersFoundError } from "./errors.js";
+import { Address, addressType, Email } from "./Address.js";
+import { removeAuthToken, setAuthToken, verifyAuthToken } from "./Authentication.js";
 import jwt from 'jsonwebtoken';
 
-const port = 3000;
+const port = config.port;
 const app = express();
+
+https.createServer(config.sslOptions, app).listen(3000, () => {
+    console.log('HTTPS server running at https://localhost:3000');
+});
+
 
 app.use(express.json());
 app.use(cookieParser())
@@ -27,9 +34,6 @@ app.get('/', (req, res) => {
     res.sendFile('main.html', { root: path.join(config.__dirname, "pages") });
 });
 
-app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
-});
 
 app.get('/services', async (req, res) => {
     try {
@@ -199,7 +203,7 @@ app.get('/time-zone-offset-in-minutes', async (req, res) => {
     res.send(JSON.stringify(timeZoneOffsetInMinutes()));
 })
 
-app.post('/deadline', async (req,res) => {
+app.post('/deadline', async (req, res) => {
     try {
         // First check if the body is properly formatted
         if (!req.body || !req.body.selectedServices || !req.body.initialVisitDate) {
@@ -208,13 +212,13 @@ app.post('/deadline', async (req,res) => {
         }
 
         // Parse the selected services
-        const selectedServicesIds = Array.isArray(req.body.selectedServices) 
-            ? req.body.selectedServices 
+        const selectedServicesIds = Array.isArray(req.body.selectedServices)
+            ? req.body.selectedServices
             : JSON.parse(req.body.selectedServices);
 
         // Get the services from the database
         const selectedServices = await database.query(
-            `SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, 
+            `SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`,
             selectedServicesIds
         );
 
@@ -274,40 +278,40 @@ app.get('/successful-order', async (req, res) => {
 app.post('/update-customer-info', verifyAuthToken, async (req, res) => {
     try {
         const { firstName, lastName, email } = req.body;
-        
+
         // Build the update query dynamically based on provided fields
         const updates = [];
         const params = [];
-        
+
         if (firstName !== undefined) {
             updates.push('firstName = ?');
             params.push(firstName);
         }
-        
+
         if (lastName !== undefined) {
             updates.push('lastName = ?');
             params.push(lastName);
         }
-        
+
         if (email !== undefined) {
             updates.push('email = ?');
             params.push(email);
         }
-        
+
         if (updates.length === 0) {
             res.status(400).json({ success: false, error: 'No fields to update' });
             return;
         }
-        
+
         // Add the user ID as the last parameter
         params.push(req.userId);
-        
+
         // Execute the update
         await database.run(
             `UPDATE Customers SET ${updates.join(', ')} WHERE id = ?`,
             params
         );
-        
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error updating customer info:', error);
@@ -322,30 +326,30 @@ app.get('/my-orders-page', async (req, res) => {
 app.delete('/my-orders/:orderId', verifyAuthToken, async (req, res) => {
     try {
         const { orderId } = req.params;
-        
+
         // First verify the order belongs to the user
         const orders = await database.query(
             'SELECT * FROM Orders WHERE id = ? AND customerId = ?',
             [orderId, req.userId]
         );
-        
+
         if (orders.length === 0) {
             res.status(404).json({ success: false, error: 'Order not found or unauthorized' });
             return;
         }
-        
+
         // Delete associated services first
         await database.run(
             'DELETE FROM OrderServices WHERE orderID = ?',
             [orderId]
         );
-        
+
         // Then delete the order
         await database.run(
             'DELETE FROM Orders WHERE id = ?',
             [orderId]
         );
-        
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error deleting order:', error);
@@ -372,7 +376,7 @@ function verifyAdmin(req, res, next) {
 
     const password = Buffer.from(credentials, 'base64').toString().split(':')[1];
     if (password !== process.env.ADMIN_PASSWORD) {
-            return res.status(401).send('Invalid password');
+        return res.status(401).send('Invalid password');
     }
 
     next();
@@ -401,12 +405,12 @@ app.patch('/admin/services/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { active } = req.body;
-        
+
         await database.run(
             'UPDATE Services SET active = ? WHERE id = ?',
             [active ? 1 : 0, id]
         );
-        
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error updating service:', error);
@@ -422,7 +426,7 @@ app.get('/admin/orders', verifyAdmin, async (req, res) => {
             LEFT JOIN Customers c ON o.customerID = c.id
             ORDER BY o.initialVisit DESC
         `);
-        
+
         const ordersWithServices = await Promise.all(orders.map(async (order) => {
             const services = await database.query(`
                 SELECT s.* FROM Services s
@@ -434,7 +438,7 @@ app.get('/admin/orders', verifyAdmin, async (req, res) => {
                 services
             };
         }));
-        
+
         res.status(200).json(ordersWithServices);
     } catch (error) {
         console.error('Error fetching orders:', error);
@@ -446,17 +450,17 @@ app.patch('/admin/orders/:id/deadline', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { deadline } = req.body;
-        
+
         if (!deadline) {
             res.status(400).json({ error: 'Deadline is required' });
             return;
         }
-        
+
         await database.run(
             'UPDATE Orders SET deadline = ? WHERE id = ?',
             [deadline, id]
         );
-        
+
         res.status(200).json({ success: true });
     } catch (error) {
         console.error('Error updating order deadline:', error);
@@ -467,20 +471,20 @@ app.patch('/admin/orders/:id/deadline', verifyAdmin, async (req, res) => {
 app.post('/admin/services', verifyAdmin, async (req, res) => {
     try {
         const { name, price, description, durationHours, durationMinutes } = req.body;
-        
+
         if (!name || price === undefined || !description || durationHours === undefined || durationMinutes === undefined) {
             res.status(400).json({ error: 'Name, price, description, durationHours, and durationMinutes are required' });
             return;
         }
 
         const durationMs = (durationHours * 60 + durationMinutes) * 60 * 1000;
-        
+
         const result = await database.run(
             'INSERT INTO Services (name, price, description, duration, active) VALUES (?, ?, ?, ?, 1)',
             [name, price, description, durationMs]
         );
-        
-        res.status(201).json({ 
+
+        res.status(201).json({
             id: result.lastID,
             name,
             price,
