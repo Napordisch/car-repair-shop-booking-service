@@ -3,3 +3,6 @@ node_modules
 data
 upload-to-the-server
 .env
+sync-with-the-server
+download-from-the-server
+certs
