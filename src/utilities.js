@@ -9,6 +9,12 @@ import {openingTime, closingTime} from "./config.js";
 import database from './db.js';
 const {cookieParser} = pkg;
 
+export function devConsoleLog(value) {
+    if (process.env.NODE_ENV === 'development') {
+        console.log(value);
+    }
+}
+
 export function msFromHours(hours, minutes, seconds) {
     let ms = hours * 60 * 60 * 1000
     if (minutes) {
@@ -60,12 +66,9 @@ export function servicesDuration(services){
 }
 
 export function deadline(initialVisit, services) {
-    console.log(initialVisit, services);
     const initialVisitDate = initialVisit instanceof Date ? initialVisit : new Date(initialVisit);
     let totalDuration = servicesDuration(services);
-    console.log(totalDuration);
     let deadline = new Date(initialVisitDate.getTime() + totalDuration);
-    console.log(deadline);
 
     let closingTimeThisDay = new Date(
         Date.UTC(initialVisitDate.getUTCFullYear(),
@@ -79,7 +82,6 @@ export function deadline(initialVisit, services) {
         deadline.setTime(deadline.getTime() + notWorkingTime()) ;
         closingTimeThisDay.setUTCDate(closingTimeThisDay.getUTCDate() + 1);
     }
-    console.log(deadline);
     return deadline;
 }
 
@@ -142,7 +144,6 @@ export async function findAvailableParkingSpace(initialVisit, deadline) {
             FROM Orders 
             ORDER BY initialVisit ASC
         `);
-        console.log(allSpaces);
         
         // Create a set of occupied spaces
         const occupiedSpaces = new Set();
@@ -151,7 +152,6 @@ export async function findAvailableParkingSpace(initialVisit, deadline) {
         for (const order of allOrders) {
             const orderStart = new Date(order.initialVisit);
             const orderEnd = new Date(order.deadline);
-            console.log(initialVisit, deadline, orderStart, orderEnd);
             
             // Check if the intervals overlap
             if (
@@ -161,7 +161,6 @@ export async function findAvailableParkingSpace(initialVisit, deadline) {
                 occupiedSpaces.add(order.parkingSpace);
             }
         }
-        console.log(occupiedSpaces);
         
         // Find the first available space
         for (const space of allSpaces) {
