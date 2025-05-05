@@ -20,7 +20,6 @@ export class Address {
     }
 
     static create(address) {
-        // Automatically choose the correct subclass
         if (isMobilePhone(address, 'ru-RU')) {
             return new PhoneNumber(address);
         } else if (isEmail(address)) {

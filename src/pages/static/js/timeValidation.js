@@ -1,6 +1,5 @@
 export async function isTimeOptionValid(time, selectedServices, year, month, day) {
     try {
-        // Get occupied intervals
         const occupiedIntervals = await fetch('/occupied-intervals')
             .then(response => response.json())
             .catch(error => {
@@ -8,11 +7,9 @@ export async function isTimeOptionValid(time, selectedServices, year, month, day
                 return [];
             });
 
-        // Convert time to Date object with the selected date
         const [hours, minutes] = time.split(':').map(Number);
         const timeDate = new Date(Date.UTC(year, month, day, hours, minutes, 0));
         
-        // Check if time itself overlaps with occupied intervals
         for (const interval of occupiedIntervals) {
             const intervalStart = new Date(interval.start);
             const intervalEnd = new Date(interval.end);
@@ -21,7 +18,6 @@ export async function isTimeOptionValid(time, selectedServices, year, month, day
             }
         }
 
-        // Check if the interval from time to deadline overlaps with occupied intervals
         const deadlineResponse = await fetch('/deadline', {
             method: 'POST',
             headers: {

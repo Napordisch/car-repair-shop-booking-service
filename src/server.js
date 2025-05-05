@@ -51,7 +51,6 @@ app.get('/order', async (req, res) => {
 });
 
 
-// TODO add email option and send code there
 app.post('/get-confirmation-code', async (req, res) => {
     const address = getAddress(req, res);
     const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -157,7 +156,6 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
         const selectedServices = await database.query(`SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`, selectedServicesIds);
         const d = deadline(initialVisitDate, selectedServices);
 
-        // Find an available parking space
         const parkingSpace = await findAvailableParkingSpace(initialVisitDate, d);
         if (parkingSpace === null) {
             res.status(400);
@@ -165,7 +163,6 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
             return;
         }
 
-        // Insert the order and get its ID
         const result = await database.run(
             `INSERT INTO Orders (deadline, initialVisit, customerID, parkingSpace) VALUES (?, ?, ?, ?)`,
             [d.toISOString(), initialVisitDate.toISOString(), req.userId, parkingSpace]
@@ -173,7 +170,6 @@ app.post('/create-order', verifyAuthToken, async (req, res) => {
 
         const orderId = result.lastID;
 
-        // Insert each selected service into OrderServices
         for (const serviceId of selectedServicesIds) {
             await database.run(
                 `INSERT INTO OrderServices (orderID, serviceID) VALUES (?, ?)`,
@@ -205,24 +201,20 @@ app.get('/time-zone-offset-in-minutes', async (req, res) => {
 
 app.post('/deadline', async (req, res) => {
     try {
-        // First check if the body is properly formatted
         if (!req.body || !req.body.selectedServices || !req.body.initialVisitDate) {
             res.status(400).json({ error: 'Missing required fields' });
             return;
         }
 
-        // Parse the selected services
         const selectedServicesIds = Array.isArray(req.body.selectedServices)
             ? req.body.selectedServices
             : JSON.parse(req.body.selectedServices);
 
-        // Get the services from the database
         const selectedServices = await database.query(
             `SELECT * FROM Services WHERE id in (${questionMarkPlaceholderForArray(selectedServicesIds)})`,
             selectedServicesIds
         );
 
-        // Calculate and return the deadline
         res.status(200).json({
             deadline: deadline(new Date(req.body.initialVisitDate), selectedServices)
         });
@@ -252,7 +244,6 @@ app.get('/my-orders', verifyAuthToken, async (req, res) => {
             ORDER BY initialVisit DESC
         `, [req.userId]);
 
-        // Get service IDs for each order
         const ordersWithServices = await Promise.all(orders.map(async (order) => {
             const services = await database.query(`
                 SELECT serviceID FROM OrderServices 
@@ -279,7 +270,6 @@ app.post('/update-customer-info', verifyAuthToken, async (req, res) => {
     try {
         const { firstName, lastName, email } = req.body;
 
-        // Build the update query dynamically based on provided fields
         const updates = [];
         const params = [];
 
@@ -303,10 +293,8 @@ app.post('/update-customer-info', verifyAuthToken, async (req, res) => {
             return;
         }
 
-        // Add the user ID as the last parameter
         params.push(req.userId);
 
-        // Execute the update
         await database.run(
             `UPDATE Customers SET ${updates.join(', ')} WHERE id = ?`,
             params
@@ -327,7 +315,6 @@ app.delete('/my-orders/:orderId', verifyAuthToken, async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        // First verify the order belongs to the user
         const orders = await database.query(
             'SELECT * FROM Orders WHERE id = ? AND customerId = ?',
             [orderId, req.userId]
@@ -338,13 +325,11 @@ app.delete('/my-orders/:orderId', verifyAuthToken, async (req, res) => {
             return;
         }
 
-        // Delete associated services first
         await database.run(
             'DELETE FROM OrderServices WHERE orderID = ?',
             [orderId]
         );
 
-        // Then delete the order
         await database.run(
             'DELETE FROM Orders WHERE id = ?',
             [orderId]
@@ -361,7 +346,6 @@ app.get('/login', (req, res) => {
     res.sendFile('login.html', { root: path.join(config.__dirname, "pages") });
 });
 
-// Admin authentication middleware
 function verifyAdmin(req, res, next) {
     const auth = req.headers.authorization;
     if (!auth) {
@@ -382,7 +366,6 @@ function verifyAdmin(req, res, next) {
     next();
 }
 
-// Protect admin routes
 app.get('/admin', verifyAdmin, (req, res) => {
     res.sendFile('admin.html', { root: path.join(config.__dirname, "pages") });
 });

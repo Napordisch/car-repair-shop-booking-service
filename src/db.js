@@ -83,10 +83,8 @@ export class Database {
     }
 }
 
-// Create a singleton instance
 const database = new Database();
 
-// Ensure the database connection is closed when the process exits
 process.on('exit', () => {
     database.close();
 });

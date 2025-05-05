@@ -1,6 +1,5 @@
-// Admin functions for managing the car repair shop
 
-// Fetch all services (including inactive ones)
+//  including inactive services
 async function fetchAllServices() {
     try {
         const response = await fetch('/admin/services');
@@ -14,7 +13,6 @@ async function fetchAllServices() {
     }
 }
 
-// Update service status (active/inactive)
 async function updateServiceStatus(serviceId, isActive) {
     try {
         const response = await fetch(`/admin/services/${serviceId}`, {
@@ -35,7 +33,6 @@ async function updateServiceStatus(serviceId, isActive) {
     }
 }
 
-// Fetch all orders
 async function fetchAllOrders() {
     try {
         const response = await fetch('/admin/orders');
@@ -50,7 +47,6 @@ async function fetchAllOrders() {
 }
 
 
-// Format date for display
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleString('ru-RU', {
@@ -62,7 +58,6 @@ function formatDate(dateString) {
     });
 }
 
-// Display services in the admin panel
 async function displayServices() {
     try {
         const services = await fetchAllServices();
@@ -119,7 +114,6 @@ async function displayParkingSpaces() {
     const parkingSpaces = await response.json();
     document.getElementById('parking-spaces-count').innerHTML = parkingSpaces;
 }
-// Display orders in the admin panel
 async function displayOrders() {
     try {
         const orders = await fetchAllOrders();
@@ -176,19 +170,16 @@ async function displayParkingSpacesStatus() {
         const orders = await fetchAllOrders();
         const now = new Date();
         
-        // Get all parking spaces
         const parkingSpacesResponse = await fetch('/parking-spaces');
         const totalSpaces = await parkingSpacesResponse.json();
         
         const table = document.getElementById('parking-spaces-state');
         if (!table) return;
         
-        // Clear existing rows except header
         while (table.rows.length > 1) {
             table.deleteRow(1);
         }
         
-        // Create a map of occupied parking spaces
         const occupiedSpaces = new Map();
         orders.forEach(order => {
             const visitTime = new Date(order.initialVisit);
@@ -198,7 +189,6 @@ async function displayParkingSpacesStatus() {
             }
         });
         
-        // Add rows for each parking space
         for (let i = 1; i <= totalSpaces; i++) {
             const row = table.insertRow();
             row.insertCell().textContent = i;
@@ -224,21 +214,18 @@ async function displayParkingSpacesStatus() {
     }
 }
 
-// Update the initialization to include parking spaces status
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         await displayServices();
         await displayOrders();
         await displayParkingSpacesStatus();
         await displayAmountOfParkingSpaces();
-        // Refresh status every minute
         setInterval(displayParkingSpacesStatus, 60000);
     } catch (error) {
         console.error('Error initializing admin panel:', error);
     }
 });
 
-// Make functions available globally
 window.toggleServiceStatus = async (serviceId, isActive) => {
     try {
         await updateServiceStatus(serviceId, isActive);
@@ -258,9 +245,7 @@ window.updateOrderStatus = async (orderId, status) => {
 };
 
 function localDatetimeToUTC(localDatetimeString) {
-    // Create a Date object from the local datetime string
     const date = new Date(localDatetimeString);
-    // Convert to UTC ISO string
     return date.toISOString();
 }
 
@@ -278,7 +263,6 @@ async function updateDeadline(orderId, deadline) {
             throw new Error('Failed to update deadline');
         }
         
-        // Only update parking spaces status if the deadline update was successful
         await displayParkingSpacesStatus();
     } catch (error) {
         console.error('Error updating deadline:', error);

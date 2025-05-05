@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Fetch orders
         const response = await fetch('/my-orders');
         
         if (response.status === 401) {
-            // If not authenticated, redirect to login page
             window.location.href = '/login';
             return;
         }
@@ -15,11 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const orders = await response.json();
         
-        // Fetch all services to get their names
         const servicesResponse = await fetch('/services');
         const allServices = await servicesResponse.json();
         
-        // Create a map of service IDs to service details
         const servicesMap = new Map(allServices.map(s => [s.id, s]));
         
         const container = document.getElementById('bookings-container');
@@ -29,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // Display each order
         orders.forEach(order => {
             const initialVisit = new Date(order.initialVisit);
             const deadline = new Date(order.deadline);
@@ -77,7 +72,6 @@ async function deleteBooking(orderId) {
         });
 
         if (response.status === 401) {
-            // If not authenticated, redirect to login page
             window.location.href = '/login';
             return;
         }
@@ -85,13 +79,11 @@ async function deleteBooking(orderId) {
         const result = await response.json();
         
         if (result.success) {
-            // Remove the booking from the page
             const bookingElement = document.getElementById(`booking-${orderId}`);
             if (bookingElement) {
                 bookingElement.remove();
             }
             
-            // If no bookings left, show message
             if (document.querySelectorAll('.booking-item').length === 0) {
                 document.getElementById('bookings-container').insertAdjacentHTML('beforeend', 
                     '<p>У вас нет бронирований</p>'
